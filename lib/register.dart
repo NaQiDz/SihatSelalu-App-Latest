@@ -5,9 +5,8 @@ import 'package:workshop_2/started.dart';
 import 'package:http/http.dart' as http;
 import 'choose.dart';
 import 'login.dart';
-import 'homepage.dart';
 
-//naqid
+//lisha
 
 void main() {
   runApp(RegisterPage());
@@ -41,60 +40,45 @@ class RegisterStylePage extends StatelessWidget {
         selectedGender != null &&
         passwordCheck.text.isNotEmpty &&
         confirmpassword.text.isNotEmpty) {
-        String email = emailControl.text;
-        String password = passwordCheck.text;
+      String email = emailControl.text;
+      String password = passwordCheck.text;
 
-        if (passwordCheck.text != confirmpassword.text) {
-          showToast(context, "Passwords do not match!");
-        }
-        else if (!isValidEmail(email)) {
-          showToast(context, "Please enter a valid email.");
-        }
-        else if(!isValidPassword(password)){
-          showToast(context, "Please enter a password min 8 and max 15.");
-        }
-        else {
-          try {
-            String uri = "http://10.0.2.2/SihatSelaluAppDatabase/register.php";
-            var res = await http.post(
-              Uri.parse(uri),
-              headers: {"Content-Type": "application/json"},
-              body: jsonEncode({
-                "username": username.text,
-                "email": emailControl.text,
-                "age": selectedAge,
-                "gender": selectedGender,
-                "password": passwordCheck.text,
-              }),
-            );
+      if (passwordCheck.text != confirmpassword.text) {
+        showPopup(context, "Error", "Passwords do not match!");
+      } else if (!isValidEmail(email)) {
+        showPopup(context, "Error", "Please enter a valid email.");
+      } else if (!isValidPassword(password)) {
+        showPopup(context, "Error", "Password must be 8-15 characters.");
+      } else {
+        try {
+          String uri = "http://192.168.0.145/SihatSelaluAppDatabase/register.php";
+          var res = await http.post(
+            Uri.parse(uri),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "username": username.text,
+              "email": emailControl.text,
+              "age": selectedAge,
+              "gender": selectedGender,
+              "password": passwordCheck.text,
+            }),
+          );
 
-            var response = jsonDecode(res.body);
-            if (response["success"] == "true") {
-              showToast(context, "Register successful!");
-              Future.delayed(Duration(seconds: 2), () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              });
-              username.clear();
-              emailControl.clear();
-              passwordCheck.clear();
-              confirmpassword.clear();
-              selectedAge = null;
-              selectedGender = null;
-            } else {
-              showToast(context, "Failed to register!");
-            }
-          } catch (e) {
-            print(e);
+          var response = jsonDecode(res.body);
+          if (response["success"] == "true") {
+            showPopup(context, "Success", "Registration successful!", isSuccess: true);
+          } else {
+            showPopup(context, "Error", "Failed to register!");
           }
+        } catch (e) {
+          showPopup(context, "Error", "An unexpected error occurred.");
+          print(e);
         }
+      }
     } else {
-      showToast(context, "Please fill up the form!");
+      showPopup(context, "Error", "Please fill in all the fields!");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -115,11 +99,11 @@ class RegisterStylePage extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07), // 7% horizontal padding
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.05), // 5% top padding
+                SizedBox(height: screenHeight * 0.05),
                 Align(
                   alignment: Alignment.topLeft,
                   child: IconButton(
@@ -132,13 +116,13 @@ class RegisterStylePage extends StatelessWidget {
                     },
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02), // 2% spacing
+                SizedBox(height: screenHeight * 0.02),
                 Image.asset(
                   'sources/img3.png',
-                  height: screenHeight * 0.2, // 20% of screen height
-                  width: screenWidth * 0.4,   // 40% of screen width
+                  height: screenHeight * 0.2,
+                  width: screenWidth * 0.4,
                 ),
-                SizedBox(height: screenHeight * 0.03), // 3% spacing
+                SizedBox(height: screenHeight * 0.03),
                 const Text(
                   'Register Now!',
                   textAlign: TextAlign.center,
@@ -147,10 +131,10 @@ class RegisterStylePage extends StatelessWidget {
                     fontSize: 32,
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.04), // 4% spacing
+                SizedBox(height: screenHeight * 0.04),
                 _buildTextField(context, 'Enter your username', TextInputType.text, controller: username),
                 SizedBox(height: screenHeight * 0.03),
-                _buildTextFieldEmail(context, 'Enter your email', TextInputType.emailAddress, controller: emailControl, validateEmail: true,),
+                _buildTextField(context, 'Enter your email', TextInputType.emailAddress, controller: emailControl),
                 SizedBox(height: screenHeight * 0.03),
                 _buildDropdownMenuAge(context, 'Select your age'),
                 SizedBox(height: screenHeight * 0.03),
@@ -182,27 +166,6 @@ class RegisterStylePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                    );
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Already have an account? ",
-                      style: TextStyle(color: Colors.white),
-                      children: [
-                        TextSpan(
-                          text: 'Login Now!',
-                          style: TextStyle(color: Colors.blue.shade500),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -212,13 +175,22 @@ class RegisterStylePage extends StatelessWidget {
   }
 }
 
-// Helper Widgets
-Widget _buildTextField(BuildContext context, String label, TextInputType type, {bool isObscure = false, required TextEditingController controller, List<TextInputFormatter>? inputFormatters}) {
+// Helper functions and widgets
+bool isValidEmail(String email) {
+  String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+  return RegExp(pattern).hasMatch(email);
+}
+
+bool isValidPassword(String password) {
+  return password.length >= 8 && password.length <= 15;
+}
+
+Widget _buildTextField(BuildContext context, String label, TextInputType type,
+    {bool isObscure = false, required TextEditingController controller}) {
   return TextField(
     controller: controller,
     obscureText: isObscure,
     keyboardType: type,
-    inputFormatters: inputFormatters,
     decoration: InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: Colors.white),
@@ -234,91 +206,32 @@ Widget _buildTextField(BuildContext context, String label, TextInputType type, {
   );
 }
 
-bool isValidEmail(String email) {
-  // Regular expression to validate email
-  String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-  RegExp regExp = RegExp(pattern);
-
-  // Check if email matches the pattern
-  return regExp.hasMatch(email);
-}
-
-bool isValidPassword(String password) {
-  return password.length >= 8 && password.length <= 15;
-}
-
-Widget _buildTextFieldEmail(
-    BuildContext context, String label, TextInputType type,
-    {bool isObscure = false,
-      required TextEditingController controller,
-      List<TextInputFormatter>? inputFormatters,
-      bool validateEmail = false}) {
-  return TextField(
-    controller: controller,
-    obscureText: isObscure,
-    keyboardType: type,
-    inputFormatters: inputFormatters,
-    onSubmitted: (value) {
-      if (validateEmail) {
-        if (!isValidEmail(controller.text)) {
-          showToast(context, "Invalid email format!");
-        } else {
-          showToast(context, "Email is valid!");
-        }
-      }
-    },
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.white),
-      filled: true,
-      fillColor: Colors.grey.withOpacity(0.4),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: Colors.blue, width: 2),
-      ),
-    ),
-    style: TextStyle(color: Colors.white),
-  );
-}
-
 Widget _buildDropdownMenuAge(BuildContext context, String hintText) {
   return DropdownButtonFormField<String>(
     value: selectedAge,
     items: List.generate(100, (index) => (index + 1).toString())
-        .map((age) => DropdownMenuItem(
-      value: age,
-      child: Text(age, style: TextStyle(color: Colors.white)),
-    ))
+        .map((age) => DropdownMenuItem(value: age, child: Text(age, style: TextStyle(color: Colors.white))))
         .toList(),
     onChanged: (value) {
-      selectedAge = value; // Update the selected age
+      selectedAge = value;
     },
     decoration: InputDecoration(
       filled: true,
       fillColor: Colors.grey.withOpacity(0.4),
       hintText: hintText,
       hintStyle: TextStyle(color: Colors.white),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.circular(8),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     ),
     dropdownColor: Colors.grey,
-    style: TextStyle(color: Colors.white),
   );
 }
 
 Widget _buildDropdownMenuGender(BuildContext context, String hintText) {
   return DropdownButtonFormField<String>(
     value: selectedGender,
-    items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem(value: gender, child: Text(gender, style: TextStyle(color: Colors.white)))).toList(),
+    items: ['Male', 'Female', 'Other']
+        .map((gender) => DropdownMenuItem(value: gender, child: Text(gender, style: TextStyle(color: Colors.white))))
+        .toList(),
     onChanged: (value) {
       selectedGender = value;
     },
@@ -327,22 +240,34 @@ Widget _buildDropdownMenuGender(BuildContext context, String hintText) {
       fillColor: Colors.grey.withOpacity(0.4),
       hintText: hintText,
       hintStyle: TextStyle(color: Colors.white),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.white)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.blue)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     ),
     dropdownColor: Colors.grey,
-    style: TextStyle(color: Colors.white),
   );
 }
 
-void showToast(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message, style: TextStyle(color: Colors.white)),
-      backgroundColor: Colors.black87,
-      behavior: SnackBarBehavior.floating,
-      duration: Duration(seconds: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    ),
+void showPopup(BuildContext context, String title, String message, {bool isSuccess = false}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title, style: TextStyle(color: isSuccess ? Colors.green : Colors.red)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (isSuccess) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              }
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
   );
 }
