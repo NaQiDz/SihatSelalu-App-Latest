@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'verify_code.dart';
+import 'login.dart';
 import 'dart:convert';
 
 class ForgotPassword extends StatefulWidget {
@@ -9,91 +11,161 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController emailController = TextEditingController();
+  bool isLoading = false;
 
   void sendVerificationEmail() async {
     final String email = emailController.text;
 
     if (email.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid email address')),
-      );
+      _showPopupMessage("Invalid Email", "Please enter a valid email address.");
       return;
     }
 
-    final url = Uri.parse('https://yourdomain.com/forgot_password.php');
-    final response = await http.post(
-      url,
-      body: {'email': email},
-    );
+    setState(() {
+      isLoading = true;
+    });
 
-    final responseData = json.decode(response.body);
+    final url = Uri.parse('http://192.168.156.228/SihatSelaluAppDatabase/forgot_password.php');
+    try {
+      final response = await http.post(url, body: {'email': email}).timeout(Duration(seconds: 10));
 
-    if (response.statusCode == 200 && responseData['status'] == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verification email sent successfully!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseData['message'] ?? 'Failed to send email')),
-      );
+      setState(() {
+        isLoading = false;
+      });
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == 'success') {
+          _showPopupMessage(
+            "Email Sent",
+            "A verification email has been sent successfully.",
+            onClose: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => VerifyCodePage()),
+              );
+            },
+          );
+        } else {
+          _showPopupMessage("Error", responseData['message'] ?? "Failed to send email.");
+        }
+      } else {
+        _showPopupMessage("Server Error", "Unable to send the request.");
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      _showPopupMessage("Error", "Unexpected error occurred: $e");
     }
+  }
+
+  void _showPopupMessage(String title, String message, {VoidCallback? onClose}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (onClose != null) onClose();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black, Colors.blue.shade900],
+          ),
         ),
-      ),
-      backgroundColor: Colors.black,
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Reset Password",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[800],
-                hintText: 'Enter your email',
-                hintStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: screenHeight * 0.05),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: sendVerificationEmail,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                SizedBox(height: screenHeight * 0.08),
+                Text(
+                  "Reset Password",
+                  style: TextStyle(
+                    fontSize: screenHeight * 0.035,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              child: Text(
-                "Send verification email",
-                style: TextStyle(fontSize: 16),
-              ),
+                SizedBox(height: screenHeight * 0.04),
+                TextField(
+                  controller: emailController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey.withOpacity(0.4),
+                    hintText: 'Enter your email',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.blue, width: 2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                ElevatedButton(
+                  onPressed: isLoading ? null : sendVerificationEmail,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.1,
+                      vertical: screenHeight * 0.02,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                    "Send verification email",
+                    style: TextStyle(fontSize: screenHeight * 0.022, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
