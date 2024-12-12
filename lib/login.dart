@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'choose.dart';
 import 'homepage.dart';
 import 'started.dart';
+import 'forgot_password.dart';
 
 //lisha
 
@@ -164,7 +165,10 @@ class LoginStylePage extends StatelessWidget {
                 SizedBox(height: screenHeight * 0.02),
                 TextButton(
                   onPressed: () {
-                    // Handle forgot password action
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ForgotPassword()),
+                    );
                   },
                   child: RichText(
                     text: TextSpan(
