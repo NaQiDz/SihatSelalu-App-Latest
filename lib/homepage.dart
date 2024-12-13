@@ -26,7 +26,6 @@ class ChartData {
 }
 
 class HomePage extends StatelessWidget {
-
   final String username;
   final String email;
 
@@ -42,6 +41,7 @@ class HomePage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -105,16 +105,17 @@ class HomePage extends StatelessWidget {
         Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: IconButton(
-                icon: Icon(
-                  FontAwesomeIcons.clipboardList,
-                  color: Colors.white,
+              backgroundColor: Colors.transparent,
+              child: Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(
+                    FontAwesomeIcons.bars,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
                 ),
-                onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => ProfilePage()));
-                },
               ),
             ),
             SizedBox(width: screenWidth * 0.19),
@@ -133,6 +134,98 @@ class HomePage extends StatelessWidget {
           color: Colors.white,
         ),
       ],
+    );
+  }
+
+  Widget _buildSidebar(double screenHeight) {
+    return Drawer(
+      child: Container(
+        padding: EdgeInsets.all(screenHeight * 0.01),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Profile Section
+            Container(
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+              child: Column(
+                children: [
+                  SizedBox(height: screenHeight * 0.05),
+                  CircleAvatar(
+                    radius: screenHeight * 0.04,
+                    backgroundImage: AssetImage('assets/profile.jpg'), // Replace with your asset path
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Text(
+                    'John Doe', // Replace with dynamic data if needed
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenHeight * 0.025,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'johndoe@example.com', // Replace with dynamic data if needed
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: screenHeight * 0.018,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.0),
+            _buildSidebarItem(
+              icon: FontAwesomeIcons.home,
+              title: 'Home',
+              onTap: () {
+                // Navigate to Home
+              },
+            ),
+            _buildSidebarItem(
+              icon: FontAwesomeIcons.user,
+              title: 'Profile',
+              onTap: () {
+              },
+            ),
+            _buildSidebarItem(
+              icon: FontAwesomeIcons.cog,
+              title: 'Settings',
+              onTap: () {
+                // Navigate to Settings
+              },
+            ),
+            Spacer(), // Pushes the logout button to the bottom
+            Divider(color: Colors.white70),
+            _buildSidebarItem(
+              icon: FontAwesomeIcons.signOutAlt,
+              title: 'Logout',
+              onTap: () {
+
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  Widget _buildSidebarItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: TextStyle(color: Colors.white),
+      ),
+      onTap: onTap,
     );
   }
 

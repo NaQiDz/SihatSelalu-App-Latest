@@ -27,11 +27,7 @@ class ProfileSavePage extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
-          ),
+          color: Colors.white,
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -77,7 +73,7 @@ class ProfileSavePage extends StatelessWidget {
         ),
         Icon(
           FontAwesomeIcons.bell,
-          color: Colors.white,
+          color: Colors.black,
         ),
       ],
     );
@@ -89,29 +85,29 @@ class ProfileSavePage extends StatelessWidget {
         Text(
           'PROFILE',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
+            color: Colors.black,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         CircleAvatar(
           radius: 50,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.blue,
           child: Icon(Icons.image, size: 50, color: Colors.grey),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         Text(
           'YOUR NAME',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: buildProfileForm(),
         ),
       ],
@@ -139,7 +135,7 @@ class ProfileSavePage extends StatelessWidget {
             child: Text(
               'Save Information',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),

@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:workshop_2/started.dart';
+import 'package:SihatSelaluApp/started.dart';
 import 'package:http/http.dart' as http;
-import 'choose.dart';
 import 'login.dart';
 
 //lisha
@@ -28,7 +27,8 @@ String? selectedAge;
 class RegisterStylePage extends StatelessWidget {
   TextEditingController username = TextEditingController();
   TextEditingController emailControl = TextEditingController();
-  TextEditingController age = TextEditingController();
+  TextEditingController phoneControl = TextEditingController();
+  TextEditingController ageControl = TextEditingController();
   TextEditingController gender = TextEditingController();
   TextEditingController passwordCheck = TextEditingController();
   TextEditingController confirmpassword = TextEditingController();
@@ -36,29 +36,37 @@ class RegisterStylePage extends StatelessWidget {
   Future<void> registerUser(BuildContext context) async {
     if (username.text.isNotEmpty &&
         emailControl.text.isNotEmpty &&
-        selectedAge != null &&
+        phoneControl.text.isNotEmpty &&
+        ageControl.text.isNotEmpty &&
         selectedGender != null &&
         passwordCheck.text.isNotEmpty &&
         confirmpassword.text.isNotEmpty) {
       String email = emailControl.text;
+      String age = ageControl.text;
+      String phone = phoneControl.text;
       String password = passwordCheck.text;
 
       if (passwordCheck.text != confirmpassword.text) {
         showPopup(context, "Error", "Passwords do not match!");
       } else if (!isValidEmail(email)) {
         showPopup(context, "Error", "Please enter a valid email.");
-      } else if (!isValidPassword(password)) {
+      }else if (!isValidPhoneNumber(phone)) {
+        showPopup(context, "Error", "Phone number is not valid!.");
+      }else if (!isValidTwoDigitNumber(age)) {
+        showPopup(context, "Error", "Invalid age, age must be 2 digit of number!.");
+      }else if (!isValidPassword(password)) {
         showPopup(context, "Error", "Password must be 8-15 characters.");
       } else {
         try {
-          String uri = "http://192.168.0.145/SihatSelaluAppDatabase/register.php";
+          String uri = "http://10.0.2.2/SihatSelaluAppDatabase/register.php";
           var res = await http.post(
             Uri.parse(uri),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({
               "username": username.text,
               "email": emailControl.text,
-              "age": selectedAge,
+              "phone": phoneControl.text,
+              "age": ageControl.text,
               "gender": selectedGender,
               "password": passwordCheck.text,
             }),
@@ -116,32 +124,34 @@ class RegisterStylePage extends StatelessWidget {
                     },
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.03),
                 Image.asset(
                   'sources/img3.png',
-                  height: screenHeight * 0.2,
-                  width: screenWidth * 0.4,
+                  height: screenHeight * 0.1,
+                  width: screenWidth * 0.3,
                 ),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.01),
                 const Text(
                   'Register Now!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 32,
+                    fontSize: 24,
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.04),
+                SizedBox(height: screenHeight * 0.02),
                 _buildTextField(context, 'Enter your username', TextInputType.text, controller: username),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 _buildTextField(context, 'Enter your email', TextInputType.emailAddress, controller: emailControl),
-                SizedBox(height: screenHeight * 0.03),
-                _buildDropdownMenuAge(context, 'Select your age'),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextField(context, 'Enter your Phone Number', TextInputType.phone, controller: phoneControl),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextField(context, 'Enter your Age', TextInputType.number, controller: ageControl),
+                SizedBox(height: screenHeight * 0.02),
                 _buildDropdownMenuGender(context, 'Select your gender'),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 _buildTextField(context, 'Enter your password', TextInputType.text, isObscure: true, controller: passwordCheck),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 _buildTextField(context, 'Re-enter your password', TextInputType.text, isObscure: true, controller: confirmpassword),
                 SizedBox(height: screenHeight * 0.06),
                 ElevatedButton(
@@ -181,9 +191,21 @@ bool isValidEmail(String email) {
   return RegExp(pattern).hasMatch(email);
 }
 
+bool isValidPhoneNumber(String phoneNumber) {
+  // Regular expression for Malaysian phone numbers
+  String pattern = r'^(01[0-9]-?\d{7,8}|0[3-9]-?\d{6,8})$';
+  return RegExp(pattern).hasMatch(phoneNumber);
+}
+
 bool isValidPassword(String password) {
   return password.length >= 8 && password.length <= 15;
 }
+
+bool isValidTwoDigitNumber(String input) {
+  String pattern = r'^\d{1,2}$'; // Matches 1 or 2 digits only
+  return RegExp(pattern).hasMatch(input);
+}
+
 
 Widget _buildTextField(BuildContext context, String label, TextInputType type,
     {bool isObscure = false, required TextEditingController controller}) {
@@ -203,26 +225,6 @@ Widget _buildTextField(BuildContext context, String label, TextInputType type,
       ),
     ),
     style: TextStyle(color: Colors.white),
-  );
-}
-
-Widget _buildDropdownMenuAge(BuildContext context, String hintText) {
-  return DropdownButtonFormField<String>(
-    value: selectedAge,
-    items: List.generate(100, (index) => (index + 1).toString())
-        .map((age) => DropdownMenuItem(value: age, child: Text(age, style: TextStyle(color: Colors.white))))
-        .toList(),
-    onChanged: (value) {
-      selectedAge = value;
-    },
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.grey.withOpacity(0.4),
-      hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-    dropdownColor: Colors.grey,
   );
 }
 

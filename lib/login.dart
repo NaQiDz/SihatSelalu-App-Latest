@@ -29,7 +29,7 @@ class LoginStylePage extends StatelessWidget {
   Future<void> loginUser(BuildContext context) async {
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
       try {
-        String uri = "http://192.168.0.145/SihatSelaluAppDatabase/login.php";
+        String uri = "http://10.0.2.2/SihatSelaluAppDatabase/login.php";
         var res = await http.post(
           Uri.parse(uri),
           headers: {"Content-Type": "application/json"},
