@@ -1,19 +1,23 @@
-import 'package:SihatSelaluApp/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'qrpage.dart';
+import 'profilepage.dart';
 
-class ProfilePage extends StatelessWidget {
+void main() {
+  runApp(SihatSelaluApp());
+}
+
+class SihatSelaluApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: profilepage(),
+      home: AccountPage(),
     );
   }
 }
 
-class profilepage extends StatelessWidget {
+class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -163,17 +167,17 @@ class profilepage extends StatelessWidget {
                   icon: FontAwesomeIcons.home,
                   title: 'Home',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
-                    );
+                    Navigator.pop(context);
                   },
                 ),
                 _buildSidebarItem(
                   icon: FontAwesomeIcons.user,
                   title: 'Profile',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
                   },
                 ),
                 _buildSidebarItem(
@@ -243,25 +247,6 @@ class profilepage extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 32),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -299,9 +284,28 @@ class profilepage extends StatelessWidget {
           ),
           _buildNavItem(
             context,
-            label: 'Track Calorie',
-            icon: FontAwesomeIcons.search,
+            label: 'Home',
+            icon: FontAwesomeIcons.home,
             destination: Qrpage(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 32),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
           ),
         ],
       ),
@@ -322,7 +326,7 @@ class AccountOption extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 10),
       padding: EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
+        color: Colors.grey[600],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

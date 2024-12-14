@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'choose.dart';
 
-void main() {
-  runApp(StartedPage());
-}
-
 class StartedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: MyStartedPage(),
       ),

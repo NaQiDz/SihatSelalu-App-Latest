@@ -1,15 +1,11 @@
 import 'dart:convert';
+import 'package:SihatSelaluApp/choose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:http/http.dart' as http;
 import 'login.dart';
 
-//lisha
-
-void main() {
-  runApp(RegisterPage());
-}
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -119,14 +115,14 @@ class RegisterStylePage extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StartedPage()),
+                        MaterialPageRoute(builder: (context) => ChoosePage()),
                       );
                     },
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 Image.asset(
-                  'sources/img3.png',
+                  'sources/img4.png',
                   height: screenHeight * 0.1,
                   width: screenWidth * 0.3,
                 ),
@@ -153,7 +149,7 @@ class RegisterStylePage extends StatelessWidget {
                 _buildTextField(context, 'Enter your password', TextInputType.text, isObscure: true, controller: passwordCheck),
                 SizedBox(height: screenHeight * 0.02),
                 _buildTextField(context, 'Re-enter your password', TextInputType.text, isObscure: true, controller: confirmpassword),
-                SizedBox(height: screenHeight * 0.06),
+                SizedBox(height: screenHeight * 0.04),
                 ElevatedButton(
                   onPressed: () {
                     registerUser(context);
@@ -171,7 +167,7 @@ class RegisterStylePage extends StatelessWidget {
                   child: Text(
                     'Sign Up',
                     style: TextStyle(
-                      fontSize: screenHeight * 0.022,
+                      fontSize: screenHeight * 0.015,
                       color: Colors.white,
                     ),
                   ),
@@ -208,45 +204,64 @@ bool isValidTwoDigitNumber(String input) {
 
 
 Widget _buildTextField(BuildContext context, String label, TextInputType type,
-    {bool isObscure = false, required TextEditingController controller}) {
-  return TextField(
-    controller: controller,
-    obscureText: isObscure,
-    keyboardType: type,
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.white),
-      filled: true,
-      fillColor: Colors.grey.withOpacity(0.4),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: Colors.blue, width: 2),
+    {bool isObscure = false,
+      required TextEditingController controller,
+      double? height}) {
+  return SizedBox(
+    height: height ?? 45.0, // Default height if none is provided
+    child: TextField(
+      controller: controller,
+      obscureText: isObscure,
+      keyboardType: type,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+        filled: true,
+        fillColor: Colors.grey.withOpacity(0.4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.blue, width: 2),
+        ),
       ),
+      style: TextStyle(color: Colors.white),
     ),
-    style: TextStyle(color: Colors.white),
   );
 }
 
-Widget _buildDropdownMenuGender(BuildContext context, String hintText) {
-  return DropdownButtonFormField<String>(
-    value: selectedGender,
-    items: ['Male', 'Female', 'Other']
-        .map((gender) => DropdownMenuItem(value: gender, child: Text(gender, style: TextStyle(color: Colors.white))))
-        .toList(),
-    onChanged: (value) {
-      selectedGender = value;
-    },
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.grey.withOpacity(0.4),
-      hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+
+Widget _buildDropdownMenuGender(BuildContext context, String hintText, {double? width,double? height}) {
+  return SizedBox(
+    width: width ?? double.infinity,
+    height: height ?? 45.0, // Default height if none is provided
+    child: DropdownButtonFormField<String>(
+      value: selectedGender,
+      items: ['Male', 'Female', 'Other']
+          .map(
+            (gender) => DropdownMenuItem(
+          value: gender,
+          child: Text(
+            gender,
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ),
+      )
+          .toList(),
+      onChanged: (value) {
+        selectedGender = value;
+      },
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.withOpacity(0.4),
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.white, fontSize: 12),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+      ),
+      dropdownColor: Colors.grey,
     ),
-    dropdownColor: Colors.grey,
   );
 }
+
 
 void showPopup(BuildContext context, String title, String message, {bool isSuccess = false}) {
   showDialog(
