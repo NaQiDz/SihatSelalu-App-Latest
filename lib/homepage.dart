@@ -366,9 +366,9 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItemBottom(Icons.home, 'Home'),
-              _buildNavItemBottom(Icons.star_border, 'Track Calorie'),
+              _buildNavItemBottom(Icons.track_changes, 'Track Calorie'),
               SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.star, 'Plan'),
+              _buildNavItemBottom(Icons.tips_and_updates, 'Plan'),
               _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
             ],
           ),
