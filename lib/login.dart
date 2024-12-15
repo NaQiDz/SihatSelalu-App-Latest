@@ -216,8 +216,8 @@ void showPopup(BuildContext context, String title, String message,
                   context,
                   MaterialPageRoute(
                     builder: (context) => HomePage(
-                      username: username ?? "",
-                      email: email ?? "",
+                      /*username: username ?? "",
+                      email: email ?? "",*/
                     ),
                   ),
                 );

@@ -23,6 +23,7 @@ class accountpage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
       drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
@@ -42,6 +43,26 @@ class accountpage extends StatelessWidget {
               children: [
                 _buildHeader(context, screenWidth),
                 SizedBox(height: screenHeight * 0.02),
+                CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(
+                        FontAwesomeIcons.arrowLeft,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Homepage(
+                          )),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.00),
                 Center(
                   child: Column(
                     children: [
@@ -81,7 +102,7 @@ class accountpage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(context),
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
@@ -476,49 +497,83 @@ class accountpage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigation(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.blue.shade900, Colors.black],
+  Widget _buildBottomBar(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Bottom navigation background
+        Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.black87, // Bottom bar color
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(50),
+              topRight: Radius.circular(50),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItemBottom(Icons.home, 'Home'),
+              _buildNavItemBottom(Icons.star_border, 'Track Calorie'),
+              SizedBox(width: 20), // Space for the floating QR icon
+              _buildNavItemBottom(Icons.star, 'Plan'),
+              _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
+            ],
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(
-            context,
-            label: 'Calculate BMI',
-            icon: FontAwesomeIcons.calculator,
-            destination: Qrpage(),
-          ),
-          Container(
+        // Floating QR Code Button
+        Positioned(
+          top: -25, // Adjust the position for the larger size
+          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
+          child: Container(
+            width: 60, // Make the circle bigger
+            height: 60,
             decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+              color: Colors.white, // QR Button background color
+              shape: BoxShape.circle, // Ensures the circle shape
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                  offset: Offset(0, 4), // Adds subtle shadow
+                ),
+              ],
             ),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.qrcode,
-                color: Colors.black,
+            child: Center(
+              child: Icon(
+                Icons.qr_code,
+                size: 40, // Larger QR code icon
+                color: Colors.black, // QR code icon color
               ),
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Qrpage()));
-              },
             ),
           ),
-          _buildNavItem(
-            context,
-            label: 'Track Calorie',
-            icon: FontAwesomeIcons.search,
-            destination: Qrpage(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavItemBottom(IconData icon, String label) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: Colors.white,
+          size: 28,
+        ),
+        SizedBox(height: 5),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
