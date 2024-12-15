@@ -1,32 +1,29 @@
-import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
 import 'accountpage.dart';
 
 void main() {
-  runApp(Templatepage());
+  runApp(SihatSelaluApp());
 }
 
-class Templatepage extends StatelessWidget {
+class SihatSelaluApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      home: AccountPage(),
     );
   }
 }
 
-class TemplatePage extends StatelessWidget {
-
+class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900,
       drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
@@ -46,11 +43,34 @@ class TemplatePage extends StatelessWidget {
               children: [
                 _buildHeader(context, screenWidth),
                 SizedBox(height: screenHeight * 0.02),
-                Text(
-                  'Today',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenHeight * 0.025,
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Account',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      CircleAvatar(
+                        radius: screenHeight * 0.05,
+                        backgroundColor: Colors.grey,
+                        child: Text('Image', style: TextStyle(color: Colors.black)),
+                      ),
+                      SizedBox(height: screenHeight * 0.01),
+                      Text(
+                        'YOUR NAME',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      _buildAccountOptions(screenHeight),
+                    ],
                   ),
                 ),
               ],
@@ -58,7 +78,7 @@ class TemplatePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
+      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
@@ -86,7 +106,7 @@ class TemplatePage extends StatelessWidget {
             Text(
               'SihatSelalu App',
               style: TextStyle(
-                color: Colors.blue[900],
+                color: Colors.white,
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
               ),
@@ -121,11 +141,11 @@ class TemplatePage extends StatelessWidget {
                       SizedBox(height: screenHeight * 0.05),
                       CircleAvatar(
                         radius: screenHeight * 0.04,
-                        backgroundImage: AssetImage('sources/user/user1.jpg'), // Replace with your asset path
+                        backgroundImage: AssetImage('assets/profile.jpg'), // Replace with your asset path
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       Text(
-                        'Welcome, Akmal!', // Replace with dynamic data if needed
+                        'John Doe', // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenHeight * 0.025,
@@ -133,7 +153,7 @@ class TemplatePage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Akmal@gmail.com!', // Replace with dynamic data if needed
+                        'johndoe@example.com', // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: screenHeight * 0.018,
@@ -156,8 +176,7 @@ class TemplatePage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AccountPage()
-                      ),
+                      MaterialPageRoute(builder: (context) => AccountPage()),
                     );
                   },
                 ),
@@ -174,11 +193,7 @@ class TemplatePage extends StatelessWidget {
                   icon: FontAwesomeIcons.signOutAlt,
                   title: 'Logout',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => StartedPage(
-                      )),
-                    );
+                    // Handle logout
                   },
                 ),
               ],
@@ -204,83 +219,136 @@ class TemplatePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
+  Widget _buildAccountOptions(double screenHeight) {
+    return Column(
       children: [
-        // Bottom navigation background
-        Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.black87, // Bottom bar color
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50),
-              topRight: Radius.circular(50),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItemBottom(Icons.home, 'Home'),
-              _buildNavItemBottom(Icons.star_border, 'Track Calorie'),
-              SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.star, 'Plan'),
-              _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
-            ],
-          ),
+        AccountOption(
+          title: 'Your Account',
+          subtitle: 'email@gmail.com',
+          icon: FontAwesomeIcons.userCircle,
         ),
-        // Floating QR Code Button
-        Positioned(
-          top: -25, // Adjust the position for the larger size
-          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
-          child: Container(
-            width: 60, // Make the circle bigger
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white, // QR Button background color
-              shape: BoxShape.circle, // Ensures the circle shape
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                  offset: Offset(0, 4), // Adds subtle shadow
-                ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                Icons.qr_code,
-                size: 40, // Larger QR code icon
-                color: Colors.black, // QR code icon color
-              ),
-            ),
-          ),
+        AccountOption(
+          title: 'Your Child',
+          icon: FontAwesomeIcons.child,
+        ),
+        AccountOption(
+          title: 'Record Health',
+          icon: FontAwesomeIcons.heartbeat,
+        ),
+        AccountOption(
+          title: 'History Usage',
+          icon: FontAwesomeIcons.history,
+        ),
+        AccountOption(
+          title: 'About System',
+          icon: FontAwesomeIcons.infoCircle,
         ),
       ],
     );
   }
 
-  Widget _buildNavItemBottom(IconData icon, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
+  Widget _buildBottomNavigation(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue.shade900, Colors.black],
         ),
-        SizedBox(height: 5),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            context,
+            label: 'Calculate BMI',
+            icon: FontAwesomeIcons.calculator,
+            destination: Qrpage(),
           ),
-        ),
-      ],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                FontAwesomeIcons.qrcode,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Qrpage()));
+              },
+            ),
+          ),
+          _buildNavItem(
+            context,
+            label: 'Home',
+            icon: FontAwesomeIcons.home,
+            destination: Qrpage(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 32),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AccountOption extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+
+  AccountOption({required this.title, this.subtitle, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.grey[600],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Colors.white),
+              SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(color: Colors.white)),
+                  if (subtitle != null)
+                    Text(subtitle!, style: TextStyle(color: Colors.white, fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
+          Icon(Icons.chevron_right, color: Colors.white),
+        ],
+      ),
     );
   }
 }

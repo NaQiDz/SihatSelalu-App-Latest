@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'choose.dart';
 
-void main() {
-  runApp(StartedPage());
-}
-
 class StartedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: MyStartedPage(),
       ),
@@ -41,8 +38,8 @@ class MyStartedPage extends StatelessWidget {
                 SizedBox(height: screenHeight * 0.25), // 25% of screen height for spacing
                 Image.asset(
                   'sources/img1.png',
-                  height: screenHeight * 0.4, // 40% of screen height for image
-                  width: screenWidth * 0.8,   // 80% of screen width for image
+                  height: screenHeight * 0.35, // 40% of screen height for image
+                  width: screenWidth * 0.6,   // 80% of screen width for image
                 ),
                 SizedBox(height: screenHeight * 0.02), // 2% of screen height for spacing
                 Text(

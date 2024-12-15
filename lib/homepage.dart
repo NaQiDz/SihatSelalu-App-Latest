@@ -1,12 +1,9 @@
+import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
-import 'profilepage.dart';
-
-void main() {
-  runApp(Homepage());
-}
+import 'accountpage.dart';
 
 class Homepage extends StatelessWidget {
   @override
@@ -27,21 +24,14 @@ class ChartData {
 
 class HomePage extends StatelessWidget {
 
-  final String username;
-  final String email;
-
-  const HomePage({
-    Key? key,
-    required this.username,
-    required this.email,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: Colors.blue.shade900,
+      drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -49,7 +39,7 @@ class HomePage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
+            colors: [Colors.black, Colors.blue.shade900], // Gradient for background
           ),
         ),
         child: SafeArea(
@@ -94,7 +84,7 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(context),
+      bottomNavigationBar: _buildBottomBar(context), // Bottom bar
     );
   }
 
@@ -105,16 +95,17 @@ class HomePage extends StatelessWidget {
         Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: IconButton(
-                icon: Icon(
-                  FontAwesomeIcons.clipboardList,
-                  color: Colors.white,
+              backgroundColor: Colors.transparent,
+              child: Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(
+                    FontAwesomeIcons.bars,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
                 ),
-                onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => ProfilePage()));
-                },
               ),
             ),
             SizedBox(width: screenWidth * 0.19),
@@ -133,6 +124,109 @@ class HomePage extends StatelessWidget {
           color: Colors.white,
         ),
       ],
+    );
+  }
+
+  Widget _buildSidebar(double screenHeight) {
+    return Drawer(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Container(
+            padding: EdgeInsets.all(screenHeight * 0.01),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Profile Section
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                  child: Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.05),
+                      CircleAvatar(
+                        radius: screenHeight * 0.04,
+                        backgroundImage: AssetImage('sources/user/user1.jpg'), // Replace with your asset path
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Text(
+                        'Welcome, Akmal!', // Replace with dynamic data if needed
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Akmal!', // Replace with dynamic data if needed
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: screenHeight * 0.018,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.0),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.home,
+                  title: 'Home',
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.user,
+                  title: 'Profile',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AccountPage()
+                      ),
+                    );
+                  },
+                ),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.cog,
+                  title: 'Settings',
+                  onTap: () {
+                    // Navigate to Settings
+                  },
+                ),
+                Spacer(), // Pushes the logout button to the bottom
+                Divider(color: Colors.white70),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.signOutAlt,
+                  title: 'Logout',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => StartedPage(
+                      )),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: TextStyle(color: Colors.white),
+      ),
+      onTap: onTap,
     );
   }
 
@@ -254,68 +348,83 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigation(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.blue.shade900, Colors.black],
+  Widget _buildBottomBar(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Bottom navigation background
+        Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.black87, // Bottom bar color
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(50),
+              topRight: Radius.circular(50),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItemBottom(Icons.home, 'Home'),
+              _buildNavItemBottom(Icons.star_border, 'Track Calorie'),
+              SizedBox(width: 20), // Space for the floating QR icon
+              _buildNavItemBottom(Icons.star, 'Plan'),
+              _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
+            ],
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(
-            context,
-            label: 'Calculate BMI',
-            icon: FontAwesomeIcons.calculator,
-            destination: Qrpage(),
-          ),
-          Container(
+        // Floating QR Code Button
+        Positioned(
+          top: -25, // Adjust the position for the larger size
+          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
+          child: Container(
+            width: 60, // Make the circle bigger
+            height: 60,
             decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+              color: Colors.white, // QR Button background color
+              shape: BoxShape.circle, // Ensures the circle shape
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                  offset: Offset(0, 4), // Adds subtle shadow
+                ),
+              ],
             ),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.qrcode,
-                color: Colors.black,
+            child: Center(
+              child: Icon(
+                Icons.qr_code,
+                size: 40, // Larger QR code icon
+                color: Colors.black, // QR code icon color
               ),
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Qrpage()));
-              },
             ),
           ),
-          _buildNavItem(
-            context,
-            label: 'Track Calorie',
-            icon: FontAwesomeIcons.search,
-            destination: Qrpage(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 32),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white),
+  Widget _buildNavItemBottom(IconData icon, String label) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: Colors.white,
+          size: 28,
+        ),
+        SizedBox(height: 5),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
