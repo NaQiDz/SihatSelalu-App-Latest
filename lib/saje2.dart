@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'qrpage.dart';
-import 'profilepage.dart';
+import 'accountpage.dart';
 
 void main() {
   runApp(SihatSelaluApp());
@@ -176,7 +176,7 @@ class AccountPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                      MaterialPageRoute(builder: (context) => AccountPage()),
                     );
                   },
                 ),

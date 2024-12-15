@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
-import 'profilepage.dart';
+import 'accountpage.dart';
 
 class Homepage extends StatelessWidget {
   @override
@@ -189,8 +189,8 @@ class HomePage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProfilePage(
-                      )),
+                      MaterialPageRoute(builder: (context) => AccountPage()
+                      ),
                     );
                   },
                 ),
@@ -221,9 +221,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-
-
 
   Widget _buildSidebarItem({
     required IconData icon,

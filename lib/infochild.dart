@@ -1,25 +1,21 @@
-import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
 import 'accountpage.dart';
+import 'started.dart';
 
-void main() {
-  runApp(Templatepage());
-}
-
-class Templatepage extends StatelessWidget {
+class InfoChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      home: InfoChildPage(),
+      theme: ThemeData.dark(),
     );
   }
 }
 
-class TemplatePage extends StatelessWidget {
-
+class InfoChildPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -44,12 +40,58 @@ class TemplatePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context, screenWidth),
-                SizedBox(height: screenHeight * 0.02),
-                Text(
-                  'Today',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenHeight * 0.025,
+                SizedBox(height: screenHeight * 0.06),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Your Child',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey,
+                        indent: screenWidth * 0.25,
+                        endIndent: screenWidth * 0.25,
+                        thickness: 1,
+                      ),
+                      Text(
+                        'YOUR NAME',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.05),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Current Info',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            _buildTextField('Age: '),
+                            _buildTextField('Gender: '),
+                            _buildTextField('Birthday Date: '),
+                            _buildTextField('Width: '),
+                            _buildTextField('Height: '),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -85,7 +127,7 @@ class TemplatePage extends StatelessWidget {
             Text(
               'SihatSelalu App',
               style: TextStyle(
-                color: Colors.blue[900],
+                color: Colors.white,
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
               ),
@@ -264,6 +306,26 @@ class TemplatePage extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+      child: TextField(
+        enabled: false, // Makes the TextField non-editable
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
+          filled: false,
+          fillColor: Colors.black.withOpacity(0.2),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.white),
+          ),
+        ),
       ),
     );
   }

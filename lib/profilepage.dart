@@ -1,19 +1,27 @@
 import 'package:SihatSelaluApp/homepage.dart';
+import 'package:SihatSelaluApp/saje2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'qrpage.dart';
 
-class ProfilePage extends StatelessWidget {
+class Profilepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: profilepage(),
+      home: ProfilePage(),
     );
   }
 }
 
-class profilepage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  // Tracks whether the form fields are editable
+  bool isEditable = false;
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -38,34 +46,38 @@ class profilepage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context, screenWidth),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.05),
                 Center(
                   child: Column(
                     children: [
                       Text(
-                        'Account',
+                        'Profile',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: screenHeight * 0.03,
+                          fontSize: screenHeight * 0.025,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
-                      CircleAvatar(
-                        radius: screenHeight * 0.05,
-                        backgroundColor: Colors.grey,
-                        child: Text('Image', style: TextStyle(color: Colors.black)),
+                      Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: screenHeight * 0.06,
+                            backgroundImage: NetworkImage('https://placehold.co/100x100'),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: screenHeight * 0.01),
+                      SizedBox(height: screenHeight * 0.02),
                       Text(
                         'YOUR NAME',
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.02),
-                      _buildAccountOptions(screenHeight),
+                      SizedBox(height: screenHeight * 0.04),
+                      _buildForm(context, screenHeight, screenWidth),
                     ],
                   ),
                 ),
@@ -129,7 +141,6 @@ class profilepage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Profile Section
                 Container(
                   padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
                   child: Column(
@@ -163,17 +174,14 @@ class profilepage extends StatelessWidget {
                   icon: FontAwesomeIcons.home,
                   title: 'Home',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
-                    );
+                    Navigator.pop(context);
                   },
                 ),
                 _buildSidebarItem(
                   icon: FontAwesomeIcons.user,
                   title: 'Profile',
                   onTap: () {
-                    Navigator.pop(context);
+                    // Navigate to Profile
                   },
                 ),
                 _buildSidebarItem(
@@ -215,31 +223,193 @@ class profilepage extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountOptions(double screenHeight) {
-    return Column(
-      children: [
-        AccountOption(
-          title: 'Your Account',
-          subtitle: 'email@gmail.com',
-          icon: FontAwesomeIcons.userCircle,
+  Widget _buildForm(BuildContext context, double screenHeight, double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          // Edit button at the top
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isEditable = !isEditable; // Toggle editable state
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      FontAwesomeIcons.edit,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      isEditable ? 'Cancel' : 'Edit', // Toggle button text
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20,),
+          Container(
+            height: 45, // Adjust height as needed
+            child: TextField(
+              enabled: isEditable,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: isEditable
+                    ? Colors.white.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10), // Adjust padding inside the TextField
+              ),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+
+          SizedBox(height: 10),
+          // Phone Number Field
+          Container(
+              height: 45,
+              child: TextField(
+                enabled: isEditable,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  labelStyle: TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: isEditable
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.2),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+          ),
+          SizedBox(height: 10),
+          // Age Field
+          Container(
+              height: 45,
+              child:TextField(
+                enabled: isEditable,
+                decoration: InputDecoration(
+                  labelText: 'Age',
+                  labelStyle: TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: isEditable
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.2),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+          ),
+          SizedBox(height: 10),
+          // Gender Field
+          Container(
+              height: 45,
+              child:TextField(
+                enabled: isEditable,
+                decoration: InputDecoration(
+                  labelText: 'Gender',
+                  labelStyle: TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: isEditable
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.2),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+          ),
+          SizedBox(height: screenHeight * 0.04),
+          // Conditionally show the Save button
+          if (isEditable)
+            ElevatedButton(
+              onPressed: () {
+                // Handle save action
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade700,
+                padding: EdgeInsets.symmetric(
+                  vertical: screenHeight * 0.02,
+                  horizontal: screenWidth * 0.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+              ),
+              child: Text(
+                'Save',
+                style: TextStyle(
+                  fontSize: screenHeight * 0.015,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildBottomNavigation(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue.shade900, Colors.black],
         ),
-        AccountOption(
-          title: 'Your Child',
-          icon: FontAwesomeIcons.child,
-        ),
-        AccountOption(
-          title: 'Record Health',
-          icon: FontAwesomeIcons.heartbeat,
-        ),
-        AccountOption(
-          title: 'History Usage',
-          icon: FontAwesomeIcons.history,
-        ),
-        AccountOption(
-          title: 'About System',
-          icon: FontAwesomeIcons.infoCircle,
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            context,
+            label: 'Calculate BMI',
+            icon: FontAwesomeIcons.calculator,
+            destination: AccountPage(),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                FontAwesomeIcons.qrcode,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Homepage()));
+              },
+            ),
+          ),
+          _buildNavItem(
+            context,
+            label: 'Track Calorie',
+            icon: FontAwesomeIcons.search,
+            destination: AccountPage(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -261,90 +431,5 @@ class profilepage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildBottomNavigation(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.blue.shade900, Colors.black],
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(
-            context,
-            label: 'Calculate BMI',
-            icon: FontAwesomeIcons.calculator,
-            destination: Qrpage(),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.qrcode,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Qrpage()));
-              },
-            ),
-          ),
-          _buildNavItem(
-            context,
-            label: 'Track Calorie',
-            icon: FontAwesomeIcons.search,
-            destination: Qrpage(),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class AccountOption extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-
-  AccountOption({required this.title, this.subtitle, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: Colors.white),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(color: Colors.white)),
-                  if (subtitle != null)
-                    Text(subtitle!, style: TextStyle(color: Colors.white, fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-          Icon(Icons.chevron_right, color: Colors.white),
-        ],
-      ),
-    );
-  }
-}

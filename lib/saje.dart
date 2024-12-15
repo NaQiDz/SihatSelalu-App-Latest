@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'qrpage.dart';
+import 'accountpage.dart';
+import 'started.dart';
 
 void main() {
   runApp(SihatSelaluApp());
@@ -8,139 +12,332 @@ class SihatSelaluApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: AccountPage(),
+      debugShowCheckedModeBanner: false,
+      home: EditChildInformationScreen(),
     );
   }
 }
 
-class AccountPage extends StatelessWidget {
+class EditChildInformationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: Icon(Icons.menu),
-        title: Text('SihatSelalu App', style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          Icon(Icons.notifications),
-        ],
+      drawer: _buildSidebar(screenHeight),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black, Colors.blue.shade900],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(screenWidth * 0.04),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, screenWidth),
+                SizedBox(height: screenHeight * 0.06),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Edit Your Child',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Information',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                        indent: screenWidth * 0.25,
+                        endIndent: screenWidth * 0.25,
+                      ),
+                      SizedBox(height: 40),
+                      _buildTextField('Akmal Hakim', 'Full Name'),
+                      SizedBox(height: 16),
+                      _buildTextField('22 years old','Age'),
+                      SizedBox(height: 16),
+                      _buildTextField('Male','Gender'),
+                      SizedBox(height: 16),
+                      _buildTextField('09 September 2002','Birthday Date'),
+                      SizedBox(height: 16),
+                      _buildTextField('45 kg','Width'),
+                      SizedBox(height: 16),
+                      _buildTextField('125 cm','Height'),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle save action
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade700,
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.02,
+                            horizontal: screenWidth * 0.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                        ),
+                        child: Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.015,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 20),
-          Text('Account', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          SizedBox(height: 20),
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey,
-            child: Text('Image', style: TextStyle(color: Colors.black)),
-          ),
-          SizedBox(height: 10),
-          Text('YOUR NAME', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          SizedBox(height: 20),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+      bottomNavigationBar: _buildBottomNavigation(context),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, double screenWidth) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(
+                    FontAwesomeIcons.bars,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: screenWidth * 0.19),
+            Text(
+              'SihatSelalu App',
+              style: TextStyle(
+                color: Colors.blue[900],
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Icon(
+          FontAwesomeIcons.bell,
+          color: Colors.white,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSidebar(double screenHeight) {
+    return Drawer(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Container(
+            padding: EdgeInsets.all(screenHeight * 0.01),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AccountOption(
-                  title: 'Your Account',
-                  subtitle: 'email@gmail.com',
-                  icon: Icons.account_circle,
+                // Profile Section
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                  child: Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.05),
+                      CircleAvatar(
+                        radius: screenHeight * 0.04,
+                        backgroundImage: AssetImage('sources/user/user1.jpg'), // Replace with your asset path
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      Text(
+                        'Welcome, Akmal!', // Replace with dynamic data if needed
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Akmal@gmail.com!', // Replace with dynamic data if needed
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: screenHeight * 0.018,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                AccountOption(
-                  title: 'Your Child',
-                  icon: Icons.child_care,
+                SizedBox(height: screenHeight * 0.0),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.home,
+                  title: 'Home',
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                AccountOption(
-                  title: 'Record Health',
-                  icon: Icons.health_and_safety,
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.user,
+                  title: 'Profile',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AccountPage()
+                      ),
+                    );
+                  },
                 ),
-                AccountOption(
-                  title: 'History Usage',
-                  icon: Icons.history,
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.cog,
+                  title: 'Settings',
+                  onTap: () {
+                    // Navigate to Settings
+                  },
                 ),
-                AccountOption(
-                  title: 'About System',
-                  icon: Icons.info,
+                Spacer(), // Pushes the logout button to the bottom
+                Divider(color: Colors.white70),
+                _buildSidebarItem(
+                  icon: FontAwesomeIcons.signOutAlt,
+                  title: 'Logout',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => StartedPage(
+                      )),
+                    );
+                  },
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        items: [
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(Icons.calculate, color: Colors.white),
-                Text('Calculate BMI', style: TextStyle(color: Colors.white, fontSize: 12)),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(Icons.qr_code, color: Colors.white),
-                Text('QR Code', style: TextStyle(color: Colors.white, fontSize: 12)),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(Icons.home, color: Colors.white),
-                Text('Home', style: TextStyle(color: Colors.white, fontSize: 12)),
-              ],
-            ),
-            label: '',
-          ),
-        ],
+          );
+        },
       ),
     );
   }
-}
 
-class AccountOption extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final IconData icon;
+  Widget _buildSidebarItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: TextStyle(color: Colors.white),
+      ),
+      onTap: onTap,
+    );
+  }
 
-  AccountOption({required this.title, this.subtitle, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBottomNavigation(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      padding: EdgeInsets.all(15),
+      padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey[600],
-        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue.shade900, Colors.black],
+        ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: Colors.white),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(color: Colors.white)),
-                  if (subtitle != null)
-                    Text(subtitle!, style: TextStyle(color: Colors.white, fontSize: 12)),
-                ],
-              ),
-            ],
+          _buildNavItem(
+            context,
+            label: 'Calculate BMI',
+            icon: FontAwesomeIcons.calculator,
+            destination: Qrpage(),
           ),
-          Icon(Icons.chevron_right, color: Colors.white),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                FontAwesomeIcons.qrcode,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Qrpage()));
+              },
+            ),
+          ),
+          _buildNavItem(
+            context,
+            label: 'Track Calorie',
+            icon: FontAwesomeIcons.search,
+            destination: Qrpage(),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 32),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, String hint) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[300]),
+        filled: true,
+        fillColor: Colors.grey.withOpacity(0.2),
+        hintText: hint, // Add hint here
+        hintStyle: TextStyle(color: Colors.grey[500]), // Style the hint text
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      style: TextStyle(color: Colors.grey[300]),
     );
   }
 }
