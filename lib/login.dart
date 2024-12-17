@@ -212,14 +212,9 @@ void showPopup(BuildContext context, String title, String message,
               Navigator.of(context).pop();
               if (isSuccess) {
                 // Navigate to HomePage on success
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => HomePage(
-                      /*username: username ?? "",
-                      email: email ?? "",*/
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => Homepage()),
                 );
               }
             },

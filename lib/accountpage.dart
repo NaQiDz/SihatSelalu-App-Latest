@@ -1,10 +1,12 @@
+import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/childpage.dart';
+import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/homepage.dart';
 import 'package:SihatSelaluApp/profilepage.dart';
+import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'qrpage.dart';
 
 class AccountPage extends StatelessWidget {
   @override
@@ -24,7 +26,7 @@ class accountpage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
-      drawer: _buildSidebar(screenHeight),
+      drawer: const SideBar(),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -41,7 +43,7 @@ class accountpage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(context, screenWidth),
+                const Header(),
                 SizedBox(height: screenHeight * 0.02),
                 CircleAvatar(
                   backgroundColor: Colors.transparent,
@@ -102,7 +104,7 @@ class accountpage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
+      bottomNavigationBar: const BottomBar(),
     );
   }
 
@@ -475,105 +477,6 @@ class accountpage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, {required String label, required IconData icon, required Widget destination}) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 32),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Bottom navigation background
-        Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.black87, // Bottom bar color
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50),
-              topRight: Radius.circular(50),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItemBottom(Icons.home, 'Home'),
-              _buildNavItemBottom(Icons.track_changes, 'Track Calorie'),
-              SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.tips_and_updates, 'Plan'),
-              _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
-            ],
-          ),
-        ),
-        // Floating QR Code Button
-        Positioned(
-          top: -25, // Adjust the position for the larger size
-          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
-          child: Container(
-            width: 60, // Make the circle bigger
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white, // QR Button background color
-              shape: BoxShape.circle, // Ensures the circle shape
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                  offset: Offset(0, 4), // Adds subtle shadow
-                ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                Icons.qr_code,
-                size: 40, // Larger QR code icon
-                color: Colors.black, // QR code icon color
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItemBottom(IconData icon, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
-        SizedBox(height: 5),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
-      ],
     );
   }
 }
