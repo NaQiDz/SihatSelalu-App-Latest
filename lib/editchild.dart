@@ -1,36 +1,28 @@
-import 'package:SihatSelaluApp/started.dart';
+import 'package:SihatSelaluApp/childpage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
 import 'accountpage.dart';
+import 'started.dart';
 
-class Homepage extends StatelessWidget {
+class EditChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      home: EditChildInformationScreen(),
     );
   }
 }
 
-class ChartData {
-  final String x;
-  final double y;
-  final Color color;
-
-  ChartData(this.x, this.y, this.color);
-}
-
-class HomePage extends StatelessWidget {
-
+class EditChildInformationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900,
+      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
       drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
@@ -39,7 +31,7 @@ class HomePage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900], // Gradient for background
+            colors: [Colors.black, Colors.blue.shade900],
           ),
         ),
         child: SafeArea(
@@ -50,41 +42,94 @@ class HomePage extends StatelessWidget {
               children: [
                 _buildHeader(context, screenWidth),
                 SizedBox(height: screenHeight * 0.02),
-                Text(
-                  'Today',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenHeight * 0.025,
+                CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(
+                        FontAwesomeIcons.arrowLeft,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChildPage()),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                _buildCircularChart(screenHeight),
-                SizedBox(height: screenHeight * 0.02),
-                Row(
-                  children: [
-                    _buildInfoCard(
-                      title: 'Weight:',
-                      icon: FontAwesomeIcons.weight,
-                      iconColor: Colors.red,
-                      screenWidth: screenWidth,
-                    ),
-                    SizedBox(width: screenWidth * 0.04),
-                    _buildInfoCard(
-                      title: 'Height:',
-                      icon: FontAwesomeIcons.ruler,
-                      iconColor: Colors.blue,
-                      screenWidth: screenWidth,
-                    ),
-                  ],
+                SizedBox(height: screenHeight * 0.00),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Edit Your Child',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Information',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                        indent: screenWidth * 0.25,
+                        endIndent: screenWidth * 0.25,
+                      ),
+                      SizedBox(height: 40),
+                      _buildTextField('Akmal Hakim', 'Full Name'),
+                      SizedBox(height: 16),
+                      _buildTextField('22 years old','Age'),
+                      SizedBox(height: 16),
+                      _buildTextField('Male','Gender'),
+                      SizedBox(height: 16),
+                      _buildTextField('09 September 2002','Birthday Date'),
+                      SizedBox(height: 16),
+                      _buildTextField('45 kg','Width'),
+                      SizedBox(height: 16),
+                      _buildTextField('125 cm','Height'),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle save action
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade700,
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.02,
+                            horizontal: screenWidth * 0.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                        ),
+                        child: Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.015,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                _buildWeightGoals(screenWidth),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context), // Bottom bar
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
@@ -159,7 +204,7 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Akmal!', // Replace with dynamic data if needed
+                        'Akmal@gmail.com!', // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: screenHeight * 0.018,
@@ -227,124 +272,6 @@ class HomePage extends StatelessWidget {
         style: TextStyle(color: Colors.white),
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildCircularChart(double screenHeight) {
-    return Container(
-      padding: EdgeInsets.all(screenHeight * 0.02),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Calories',
-            style: TextStyle(color: Colors.white),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Center(
-            child: SizedBox(
-              width: screenHeight * 0.25,
-              height: screenHeight * 0.25,
-              child: SfCircularChart(
-                annotations: <CircularChartAnnotation>[
-                  CircularChartAnnotation(
-                    widget: Text(
-                      '60%\nRemaining',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                ],
-                series: <CircularSeries>[
-                  DoughnutSeries<ChartData, String>(
-                    dataSource: [
-                      ChartData('Consumed', 40, Colors.blue),
-                      ChartData('Remaining', 60, Colors.green),
-                    ],
-                    xValueMapper: (ChartData data, _) => data.x,
-                    yValueMapper: (ChartData data, _) => data.y,
-                    pointColorMapper: (ChartData data, _) => data.color,
-                    innerRadius: '90%',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required double screenWidth,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: screenWidth * 0.02),
-            Icon(
-              icon,
-              color: iconColor,
-              size: screenWidth * 0.08,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeightGoals(double screenWidth) {
-    return Container(
-      padding: EdgeInsets.all(screenWidth * 0.04),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Weight Goals:',
-            style: TextStyle(color: Colors.white),
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  Text(
-                    '${95 - (index * 5)} kg',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  Divider(color: Colors.white),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -425,6 +352,28 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTextField(String label, String hint) {
+    return Container(
+      width: 280,
+      height: 40,// Adjust width here
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.grey[300], fontSize: 12),
+          filled: true,
+          fillColor: Colors.grey.withOpacity(0.2),
+          hintText: hint, // Add hint here
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 12), // Style the hint text
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(color: Colors.grey[300]),
+      ),
     );
   }
 }

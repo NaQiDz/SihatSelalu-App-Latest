@@ -127,6 +127,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.08),
+                Image.asset(
+                  'sources/img3.png',
+                  height: screenHeight * 0.2,
+                  width: screenWidth * 0.5,
+                ),
+                SizedBox(height: screenHeight * 0.05),
                 Text(
                   "Reset Password",
                   style: TextStyle(

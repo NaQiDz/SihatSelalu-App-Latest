@@ -1,36 +1,29 @@
-import 'package:SihatSelaluApp/started.dart';
+import 'package:SihatSelaluApp/childpage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'qrpage.dart';
 import 'accountpage.dart';
+import 'started.dart';
 
-class Homepage extends StatelessWidget {
+class InfoChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      home: InfoChildPage(),
+      theme: ThemeData.dark(),
     );
   }
 }
 
-class ChartData {
-  final String x;
-  final double y;
-  final Color color;
-
-  ChartData(this.x, this.y, this.color);
-}
-
-class HomePage extends StatelessWidget {
-
+class InfoChildPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900,
+      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
       drawer: _buildSidebar(screenHeight),
       body: Container(
         width: double.infinity,
@@ -39,7 +32,7 @@ class HomePage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900], // Gradient for background
+            colors: [Colors.black, Colors.blue.shade900],
           ),
         ),
         child: SafeArea(
@@ -50,41 +43,84 @@ class HomePage extends StatelessWidget {
               children: [
                 _buildHeader(context, screenWidth),
                 SizedBox(height: screenHeight * 0.02),
-                Text(
-                  'Today',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenHeight * 0.025,
+                CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(
+                        FontAwesomeIcons.arrowLeft,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChildPage()),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                _buildCircularChart(screenHeight),
-                SizedBox(height: screenHeight * 0.02),
-                Row(
-                  children: [
-                    _buildInfoCard(
-                      title: 'Weight:',
-                      icon: FontAwesomeIcons.weight,
-                      iconColor: Colors.red,
-                      screenWidth: screenWidth,
-                    ),
-                    SizedBox(width: screenWidth * 0.04),
-                    _buildInfoCard(
-                      title: 'Height:',
-                      icon: FontAwesomeIcons.ruler,
-                      iconColor: Colors.blue,
-                      screenWidth: screenWidth,
-                    ),
-                  ],
+                SizedBox(height: screenHeight * 0.00),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Your Child',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey,
+                        indent: screenWidth * 0.25,
+                        endIndent: screenWidth * 0.25,
+                        thickness: 1,
+                      ),
+                      Text(
+                        'YOUR NAME',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.025,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.05),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Current Info',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            _buildTextField('Age: '),
+                            _buildTextField('Gender: '),
+                            _buildTextField('Birthday Date: '),
+                            _buildTextField('Width: '),
+                            _buildTextField('Height: '),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                _buildWeightGoals(screenWidth),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context), // Bottom bar
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
@@ -112,7 +148,7 @@ class HomePage extends StatelessWidget {
             Text(
               'SihatSelalu App',
               style: TextStyle(
-                color: Colors.blue[900],
+                color: Colors.white,
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
               ),
@@ -159,7 +195,7 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Akmal!', // Replace with dynamic data if needed
+                        'Akmal@gmail.com!', // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: screenHeight * 0.018,
@@ -227,124 +263,6 @@ class HomePage extends StatelessWidget {
         style: TextStyle(color: Colors.white),
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildCircularChart(double screenHeight) {
-    return Container(
-      padding: EdgeInsets.all(screenHeight * 0.02),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Calories',
-            style: TextStyle(color: Colors.white),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Center(
-            child: SizedBox(
-              width: screenHeight * 0.25,
-              height: screenHeight * 0.25,
-              child: SfCircularChart(
-                annotations: <CircularChartAnnotation>[
-                  CircularChartAnnotation(
-                    widget: Text(
-                      '60%\nRemaining',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                ],
-                series: <CircularSeries>[
-                  DoughnutSeries<ChartData, String>(
-                    dataSource: [
-                      ChartData('Consumed', 40, Colors.blue),
-                      ChartData('Remaining', 60, Colors.green),
-                    ],
-                    xValueMapper: (ChartData data, _) => data.x,
-                    yValueMapper: (ChartData data, _) => data.y,
-                    pointColorMapper: (ChartData data, _) => data.color,
-                    innerRadius: '90%',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required double screenWidth,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: screenWidth * 0.02),
-            Icon(
-              icon,
-              color: iconColor,
-              size: screenWidth * 0.08,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeightGoals(double screenWidth) {
-    return Container(
-      padding: EdgeInsets.all(screenWidth * 0.04),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Weight Goals:',
-            style: TextStyle(color: Colors.white),
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  Text(
-                    '${95 - (index * 5)} kg',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  Divider(color: Colors.white),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -425,6 +343,26 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTextField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+      child: TextField(
+        enabled: false, // Makes the TextField non-editable
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
+          filled: false,
+          fillColor: Colors.black.withOpacity(0.2),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.white),
+          ),
+        ),
+      ),
     );
   }
 }

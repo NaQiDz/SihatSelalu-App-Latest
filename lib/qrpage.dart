@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
-void main() {
-  runApp(Qrpage());
-}
-
 class Qrpage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

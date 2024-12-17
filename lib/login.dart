@@ -4,13 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:workshop_2/forgot_password.dart';
 import 'choose.dart';
 import 'homepage.dart';
-import 'started.dart';
-
-//lisha
-
-void main() {
-  runApp(LoginPage());
-}
+import 'forgot_password.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -29,7 +23,7 @@ class LoginStylePage extends StatelessWidget {
   Future<void> loginUser(BuildContext context) async {
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
       try {
-        String uri = "http://192.168.0.145/SihatSelaluAppDatabase/login.php";
+        String uri = "http://172.20.10.3/SihatSelaluAppDatabase/login.php";
         var res = await http.post(
           Uri.parse(uri),
           headers: {"Content-Type": "application/json"},
@@ -97,7 +91,7 @@ class LoginStylePage extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StartedPage()),
+                        MaterialPageRoute(builder: (context) => ChoosePage()),
                       );
                     },
                   ),
@@ -108,44 +102,54 @@ class LoginStylePage extends StatelessWidget {
                   height: screenHeight * 0.3,
                   width: screenWidth * 0.6,
                 ),
+                SizedBox(height: screenHeight * 0.05),
+                SizedBox(
+                  width: screenWidth * 0.9, // Adjust width relative to the screen size
+                  height: 45.0,            // Set the desired height
+                  child: TextField(
+                    controller: username,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+                      filled: true,
+                      fillColor: Colors.grey.withOpacity(0.4),
+                      contentPadding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0), // Adjust internal padding
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(color: Colors.blue, width: 2),
+                      ),
+                    ),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+
+                SizedBox(height: screenHeight * 0.02),
+                SizedBox(
+                  width: screenWidth * 0.9, // Adjust width relative to the screen size
+                  height: 45.0,            // Set the desired height
+                  child: TextField(
+                      controller: password,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.4),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: Colors.blue, width: 2),
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                ),
                 SizedBox(height: screenHeight * 0.04),
-                TextField(
-                  controller: username,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: TextStyle(color: Colors.white),
-                    filled: true,
-                    fillColor: Colors.grey.withOpacity(0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(color: Colors.blue, width: 2),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(height: screenHeight * 0.03),
-                TextField(
-                  controller: password,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.white),
-                    filled: true,
-                    fillColor: Colors.grey.withOpacity(0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(color: Colors.blue, width: 2),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(height: screenHeight * 0.06),
                 ElevatedButton(
                   onPressed: () {
                     loginUser(context);
@@ -153,7 +157,7 @@ class LoginStylePage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade700,
                     padding: EdgeInsets.symmetric(
-                      vertical: screenHeight * 0.02,
+                      vertical: screenHeight * 0.015,
                       horizontal: screenWidth * 0.2,
                     ),
                     shape: RoundedRectangleBorder(
@@ -163,7 +167,7 @@ class LoginStylePage extends StatelessWidget {
                   child: Text(
                     'Login',
                     style: TextStyle(
-                      fontSize: screenHeight * 0.022,
+                      fontSize: screenHeight * 0.020,
                       color: Colors.white,
                     ),
                   ),
@@ -219,8 +223,8 @@ void showPopup(BuildContext context, String title, String message,
                   context,
                   MaterialPageRoute(
                     builder: (context) => HomePage(
-                      username: username ?? "",
-                      email: email ?? "",
+                      /*username: username ?? "",
+                      email: email ?? "",*/
                     ),
                   ),
                 );

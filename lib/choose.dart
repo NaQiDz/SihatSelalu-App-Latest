@@ -3,14 +3,11 @@ import 'started.dart';
 import 'login.dart';
 import 'register.dart';
 
-void main() {
-  runApp(ChoosePage());
-}
-
 class ChoosePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Container(
           decoration: BoxDecoration(
