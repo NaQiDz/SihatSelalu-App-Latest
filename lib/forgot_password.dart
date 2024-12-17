@@ -4,6 +4,16 @@ import 'verify_code.dart';
 import 'login.dart';
 import 'dart:convert';
 
+class ResetPassword extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: ForgotPassword(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
 class ForgotPassword extends StatefulWidget {
   @override
   _ForgotPasswordState createState() => _ForgotPasswordState();
@@ -25,7 +35,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.156.228/SihatSelaluAppDatabase/forgot_password.php');
+    final url = Uri.parse('http://192.168.0.145/SihatSelaluAppDatabase/forgot_password.php');
     try {
       final response = await http.post(url, body: {'email': email}).timeout(Duration(seconds: 10));
 

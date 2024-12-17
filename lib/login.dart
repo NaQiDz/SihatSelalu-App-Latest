@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:workshop_2/forgot_password.dart';
 import 'choose.dart';
 import 'homepage.dart';
 import 'started.dart';
@@ -37,19 +38,24 @@ class LoginStylePage extends StatelessWidget {
             "password": password.text,
           }),
         );
-        var response = jsonDecode(res.body);
 
-        if (response["success"] == "true") {
-          showPopup(
-            context,
-            "Success",
-            "Login successful!",
-            isSuccess: true,
-            username: response["data"]["username"],
-            email: response["data"]["email"],
-          );
+        if (res.statusCode == 200) {
+          var response = jsonDecode(res.body);
+
+          if (response["success"] == "true") {
+            showPopup(
+              context,
+              "Success",
+              "Login successful!",
+              isSuccess: true,
+              username: response["data"]["username"],
+              email: response["data"]["email"],
+            );
+          } else {
+            showPopup(context, "Error", response["message"]);
+          }
         } else {
-          showPopup(context, "Error", response["message"]);
+          showPopup(context, "Error", "Failed to contact the server.");
         }
       } catch (e) {
         print(e);
@@ -59,6 +65,7 @@ class LoginStylePage extends StatelessWidget {
       showPopup(context, "Error", "Please enter both username and password!");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +171,10 @@ class LoginStylePage extends StatelessWidget {
                 SizedBox(height: screenHeight * 0.02),
                 TextButton(
                   onPressed: () {
-                    // Handle forgot password action
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ForgotPassword()),
+                    );
                   },
                   child: RichText(
                     text: TextSpan(
