@@ -1,5 +1,5 @@
 import 'package:SihatSelaluApp/accountpage.dart';
-import 'package:SihatSelaluApp/homepage.dart';
+import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -59,7 +59,7 @@ class SideBar extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
+                      MaterialPageRoute(builder: (context) => HomePage()),
                     );
                   },
                 ),

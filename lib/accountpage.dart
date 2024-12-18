@@ -1,7 +1,7 @@
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/header.dart';
-import 'package:SihatSelaluApp/homepage.dart';
+import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/profilepage.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:SihatSelaluApp/started.dart';
@@ -57,7 +57,7 @@ class accountpage extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Homepage(
+                          MaterialPageRoute(builder: (context) => HomePage(
                           )),
                         );
                       },

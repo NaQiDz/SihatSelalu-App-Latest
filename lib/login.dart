@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'choose.dart';
-import 'homepage.dart';
 import 'forgot_password.dart';
 
 class LoginPage extends StatelessWidget {
@@ -22,7 +22,7 @@ class LoginStylePage extends StatelessWidget {
   Future<void> loginUser(BuildContext context) async {
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
       try {
-        String uri = "http://172.20.10.3/SihatSelaluAppDatabase/login.php";
+        String uri = "http://10.0.2.2/SihatSelaluAppDatabase/login.php";
         var res = await http.post(
           Uri.parse(uri),
           headers: {"Content-Type": "application/json"},
@@ -34,25 +34,29 @@ class LoginStylePage extends StatelessWidget {
         var response = jsonDecode(res.body);
 
         if (response["success"] == "true") {
-          showPopup(
+          showPopup(context, "Success" , "Login successful!", loginSession:true);
+          // Navigate to the next page, e.g., HomePage
+          String username = response["data"]["username"];
+          String email = response["data"]["email"];
+
+          Navigator.pushReplacement(
             context,
-            "Success",
-            "Login successful!",
-            isSuccess: true,
-            username: response["data"]["username"],
-            email: response["data"]["email"],
+            MaterialPageRoute(
+              builder: (context) => HomePageToUse(),
+            ),
           );
         } else {
-          showPopup(context, "Error", response["message"]);
+          showPopup(context, "Error"  , response["message"], loginSession:false); // Show failure message
         }
       } catch (e) {
         print(e);
-        showPopup(context, "Error", "An error occurred. Please try again.");
+        showPopup(context, "Error" , "An error occurred. Please try again.", loginSession:false);
       }
     } else {
-      showPopup(context, "Error", "Please enter both username and password!");
+      showPopup(context, "Error" , "Please enter both username and password!", loginSession:false);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,33 +199,40 @@ class LoginStylePage extends StatelessWidget {
   }
 }
 
-void showPopup(BuildContext context, String title, String message,
-    {bool isSuccess = false, String? username, String? email}) {
+void showPopup(BuildContext context, String textMessage, String message, {bool loginSession = false}) {
   showDialog(
     context: context,
+    barrierDismissible: false, // Prevent dismissal by tapping outside
     builder: (BuildContext context) {
+      // Automatically close the dialog after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
+
       return AlertDialog(
-        title: Text(
-          title,
-          style: TextStyle(color: isSuccess ? Colors.green : Colors.red),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              if (isSuccess) {
-                // Navigate to HomePage on success
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Homepage()),
-                );
-              }
-            },
-            child: Text('OK'),
+        backgroundColor: Colors.white,
+
+        title: Center(
+          child: Text(
+            textMessage,
+            style: TextStyle(color: loginSession ? Colors.green : Colors.red),
           ),
-        ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 16),
+        ),
       );
     },
   );
 }
+
+
+
+
+

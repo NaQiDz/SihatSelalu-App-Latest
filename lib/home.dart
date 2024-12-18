@@ -1,15 +1,15 @@
-
+import 'package:SihatSelaluApp/bottombar.dart';
+import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:SihatSelaluApp/header.dart';
-import 'package:SihatSelaluApp/sidebar.dart';
-import 'package:SihatSelaluApp/bottombar.dart';
 
-class Homepage extends StatelessWidget {
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      home: HomePageToUse(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -23,9 +23,8 @@ class ChartData {
   ChartData(this.x, this.y, this.color);
 }
 
-class HomePage extends StatelessWidget {
+class HomePageToUse extends StatelessWidget {
 
-  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -210,4 +209,5 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+//To put widget or section
 }

@@ -43,15 +43,15 @@ class RegisterStylePage extends StatelessWidget {
       String password = passwordCheck.text;
 
       if (passwordCheck.text != confirmpassword.text) {
-        showPopup(context, "Error", "Passwords do not match!");
+        showPopup(context, "Error" , "Passwords do not match!", loginSession:false);
       } else if (!isValidEmail(email)) {
-        showPopup(context, "Error", "Please enter a valid email.");
+        showPopup(context, "Error" , "Please enter a valid email.", loginSession:false);
       }else if (!isValidPhoneNumber(phone)) {
-        showPopup(context, "Error", "Phone number is not valid!.");
+        showPopup(context, "Error"  , "Phone number is not valid!.", loginSession:false);
       }else if (!isValidTwoDigitNumber(age)) {
-        showPopup(context, "Error", "Invalid age, age must be 2 digit of number!.");
+        showPopup(context, "Error" , "Invalid age, age must be 2 digit of number!.", loginSession:false);
       }else if (!isValidPassword(password)) {
-        showPopup(context, "Error", "Password must be 8-15 characters.");
+        showPopup(context, "Error" , "Password must be 8-15 characters.", loginSession:false);
       } else {
         try {
           String uri = "http://10.0.2.2/SihatSelaluAppDatabase/register.php";
@@ -70,17 +70,17 @@ class RegisterStylePage extends StatelessWidget {
 
           var response = jsonDecode(res.body);
           if (response["success"] == "true") {
-            showPopup(context, "Success", "Registration successful!", isSuccess: true);
+            showPopup(context, "Success", "Registration successful!", loginSession:true);
           } else {
-            showPopup(context, "Error", "Failed to register!");
+            showPopup(context, "Error" , "Failed to register!", loginSession:false);
           }
         } catch (e) {
-          showPopup(context, "Error", "An unexpected error occurred.");
+          showPopup(context, "Error" , "An unexpected error occurred.", loginSession:false);
           print(e);
         }
       }
     } else {
-      showPopup(context, "Error", "Please fill in all the fields!");
+      showPopup(context, "Error" , "Please fill in all the fields!", loginSession:false);
     }
   }
 
@@ -262,28 +262,36 @@ Widget _buildDropdownMenuGender(BuildContext context, String hintText, {double? 
   );
 }
 
-
-void showPopup(BuildContext context, String title, String message, {bool isSuccess = false}) {
+void showPopup(BuildContext context, String textMessage, String message, {bool loginSession = false}) {
   showDialog(
     context: context,
+    barrierDismissible: false, // Prevent dismissal by tapping outside
     builder: (BuildContext context) {
+      // Automatically close the dialog after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
+
       return AlertDialog(
-        title: Text(title, style: TextStyle(color: isSuccess ? Colors.green : Colors.red)),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              if (isSuccess) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              }
-            },
-            child: Text('OK'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.white,
+
+        title: Center(
+          child: Text(
+            textMessage,
+            style: TextStyle(color: loginSession ? Colors.green : Colors.red),
           ),
-        ],
+        ),
+        content: Center(
+          child: Text(
+            message,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
       );
     },
   );

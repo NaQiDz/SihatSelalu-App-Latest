@@ -1,5 +1,5 @@
 import 'package:SihatSelaluApp/choosechild.dart';
-import 'package:SihatSelaluApp/homepage.dart';
+import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
 
 class BottomBar extends StatelessWidget {
@@ -23,11 +23,11 @@ class BottomBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItemBottom(Icons.home, 'Home', context, Homepage()),
-              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, Homepage()),
+              _buildNavItemBottom(Icons.home, 'Home', context, HomePage()),
+              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, HomePage()),
               SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.tips_and_updates, 'Plan', context, Homepage()),
-              _buildNavItemBottom(Icons.calculate, 'Calculate BMI', context, Homepage()),
+              _buildNavItemBottom(Icons.tips_and_updates, 'Plan', context, HomePage()),
+              _buildNavItemBottom(Icons.calculate, 'Calculate BMI', context, HomePage()),
             ],
           ),
         ),
