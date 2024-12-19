@@ -1,0 +1,88 @@
+#include <ESP8266WiFi.h>
+
+// Wi-Fi Credentials
+const char* ssid = "Hninad";       // Wi-Fi SSID
+const char* password = "12345678";       // Wi-Fi Password
+
+const int trigPin = 12;  // Trig Pin of the ultrasonic sensor
+const int echoPin = 14;  // Echo Pin of the ultrasonic sensor
+
+#define SOUND_VELOCITY 0.034
+#define CM_TO_INCH 0.393701
+
+// Known distance to the floor in cm
+const float floorDistance = 24.41;  // Adjust this based on your measurement
+
+long duration;
+float distanceToObject;
+float objectHeightCm;
+float objectHeightInch;
+
+void setup() {
+  Serial.begin(9600);      // Starts the serial communication
+  pinMode(trigPin, OUTPUT);  // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);   // Sets the echoPin as an Input
+
+  // Connect to Wi-Fi
+  Serial.println("Connecting to Wi-Fi...");
+  WiFi.begin(ssid, password);
+
+  int attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {  // Retry for 20 attempts
+    delay(3000);  // Wait for 3 seconds
+    Serial.print(".");
+    attempts++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    // Successfully connected to Wi-Fi
+    Serial.println("\nWi-Fi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    // Wi-Fi connection failed
+    Serial.println("\nFailed to connect to Wi-Fi.");
+    // You can choose to halt or try again indefinitely, depending on your project
+    while (true) {
+      delay(3000);  // Infinite loop to keep showing the failure
+    }
+  }
+  Serial.println("");
+}
+
+void loop() {
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin HIGH for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate the distance to the object
+  distanceToObject = duration * SOUND_VELOCITY / 2;
+
+  if (distanceToObject < floorDistance) {
+    // Calculate the object's height
+    objectHeightCm = floorDistance - distanceToObject;
+    objectHeightInch = objectHeightCm * CM_TO_INCH;
+
+    // Display the height in cm and inches
+    Serial.println("Object Detected!");
+    Serial.print("Object Height (cm): ");
+    Serial.println(objectHeightCm);
+    Serial.print("Object Height (inch): ");
+    Serial.println(objectHeightInch);
+  } else {
+    // Display the distance to the floor
+    Serial.println("No Object Detected");
+    Serial.print("Distance to Floor (cm): ");
+    Serial.println(distanceToObject);
+  }
+
+  delay(3000); // Delay 3 seconds between measurements
+  Serial.println("");
+}
