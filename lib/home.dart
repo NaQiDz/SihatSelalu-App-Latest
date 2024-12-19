@@ -1,5 +1,6 @@
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -24,6 +25,8 @@ class ChartData {
 }
 
 class HomePageToUse extends StatelessWidget {
+  String? username = SessionManager.username;
+  String? email = SessionManager.email;
 
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;

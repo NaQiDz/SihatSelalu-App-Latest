@@ -2,29 +2,24 @@ import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-void main() {
-  runApp(TemplatePage());
-}
-
-class TemplatePage extends StatelessWidget {
+class IOTPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: TemplatePageToUse(),
+      home: IOTPageToUse(),
     );
   }
 }
 
-class TemplatePageToUse extends StatefulWidget {
+class IOTPageToUse extends StatefulWidget {
   @override
-  State<TemplatePageToUse> createState() => _TemplatePageToUseState();
+  State<IOTPageToUse> createState() => _IOTPageToUse();
 }
 
-class _TemplatePageToUseState extends State<TemplatePageToUse> {
+class _IOTPageToUse extends State<IOTPageToUse> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -50,7 +45,7 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Header(),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.01),
                 Container(
                   padding: EdgeInsets.all(screenWidth * 0.05),
                   decoration: BoxDecoration(
@@ -109,7 +104,7 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
                               ],
                             ),
                             decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.6), // Background color for the container
+                              color: Colors.white.withOpacity(0.6), // Background color for the container
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
@@ -120,7 +115,6 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
                   ],
                 ),
                 // Adjusted SizedBox height here
-                SizedBox(height: screenHeight * 0.1),
               ],
             ),
           ),
@@ -151,7 +145,7 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
           // Linear Gauge with Animated Range
           Expanded(
             child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: 123), // Animate from 0 to 90
+              tween: Tween<double>(begin: 0, end: 142), // Animate from 0 to 90
               duration: const Duration(seconds: 2), // Set the animation duration
               builder: (context, value, child) {
                 return SfLinearGauge(
@@ -196,7 +190,7 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
             minimum: 0,
             maximum: 75,
             pointers: <GaugePointer>[
-              NeedlePointer(value: 30, enableAnimation: true),
+              NeedlePointer(value: 45, enableAnimation: true),
             ],
             ranges: <GaugeRange>[
               GaugeRange(startValue: 0, endValue: 25, color: Colors.green),

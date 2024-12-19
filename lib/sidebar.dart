@@ -1,5 +1,6 @@
 import 'package:SihatSelaluApp/accountpage.dart';
 import 'package:SihatSelaluApp/home.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,6 +10,9 @@ class SideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    String? username = SessionManager.username;
+    String? email = SessionManager.email;
     // Calculate screen height
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -35,7 +39,7 @@ class SideBar extends StatelessWidget {
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       Text(
-                        'Welcome, Akmal!', // Replace with dynamic data if needed
+                        'Welcome, '+ username! +'!', // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: screenHeight * 0.025,
@@ -43,7 +47,7 @@ class SideBar extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Akmal!', // Replace with dynamic data if needed
+                        'Email : ' + email! , // Replace with dynamic data if needed
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: screenHeight * 0.018,
@@ -86,6 +90,8 @@ class SideBar extends StatelessWidget {
                   icon: FontAwesomeIcons.signOutAlt,
                   title: 'Logout',
                   onTap: () {
+                    SessionManager.clearSession();
+                    showPopup(context, "Logout", "You has been logout", loginSession: false);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => StartedPage()),
@@ -114,4 +120,37 @@ class SideBar extends StatelessWidget {
       onTap: onTap,
     );
   }
+}
+
+void showPopup(BuildContext context, String textMessage, String message, {bool loginSession = false}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissal by tapping outside
+    builder: (BuildContext context) {
+      // Automatically close the dialog after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
+
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.white,
+
+        title: Center(
+          child: Text(
+            textMessage,
+            style: TextStyle(color: loginSession ? Colors.green : Colors.red),
+          ),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    },
+  );
 }

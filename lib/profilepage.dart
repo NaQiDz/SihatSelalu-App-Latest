@@ -1,6 +1,7 @@
 import 'package:SihatSelaluApp/accountpage.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,14 +24,21 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // Tracks whether the form fields are editable
   bool isEditable = false;
+  bool showEditButton = false; // Track if edit text should be shown
+  String defaultImageUrl = 'https://placehold.co/100x100'; // Default image URL
+  String? userImageUrl; // URL for user's profile image (can be null)
 
   @override
   Widget build(BuildContext context) {
+    String? username = SessionManager.username;
+    String? email = SessionManager.email;
+    String? age = SessionManager.age;
+    String? gender = SessionManager.gender;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
+      backgroundColor: Colors.blue.shade900,
       drawer: const SideBar(),
       body: Container(
         width: double.infinity,
@@ -81,17 +89,40 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
-                      Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: screenHeight * 0.06,
-                            backgroundImage: NetworkImage('https://placehold.co/100x100'),
-                          ),
-                        ],
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showEditButton = !showEditButton;
+                          });
+                        },
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: screenHeight * 0.06,
+                              backgroundImage: NetworkImage(userImageUrl ?? defaultImageUrl), // Use user image or default
+                              backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
+                            ),
+                            if (showEditButton) // Show the edit text conditionally
+                              Container(
+                                color: Colors.transparent,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 10),
+                                child: Text(
+                                  "Edit",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       Text(
-                        'YOUR NAME',
+                        username!.toUpperCase(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -112,140 +143,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, double screenWidth) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.transparent,
-              child: Builder(
-                builder: (context) => IconButton(
-                  icon: Icon(
-                    FontAwesomeIcons.bars,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                ),
-              ),
-            ),
-            SizedBox(width: screenWidth * 0.19),
-            Text(
-              'SihatSelalu App',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        Icon(
-          FontAwesomeIcons.bell,
-          color: Colors.white,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSidebar(double screenHeight) {
-    return Drawer(
-      child: Builder(
-        builder: (BuildContext context) {
-          return Container(
-            padding: EdgeInsets.all(screenHeight * 0.01),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
-                  child: Column(
-                    children: [
-                      SizedBox(height: screenHeight * 0.05),
-                      CircleAvatar(
-                        radius: screenHeight * 0.04,
-                        backgroundImage: AssetImage('assets/profile.jpg'), // Replace with your asset path
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Text(
-                        'John Doe', // Replace with dynamic data if needed
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenHeight * 0.025,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'johndoe@example.com', // Replace with dynamic data if needed
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: screenHeight * 0.018,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.0),
-                _buildSidebarItem(
-                  icon: FontAwesomeIcons.home,
-                  title: 'Home',
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: FontAwesomeIcons.user,
-                  title: 'Profile',
-                  onTap: () {
-                    // Navigate to Profile
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: FontAwesomeIcons.cog,
-                  title: 'Settings',
-                  onTap: () {
-                    // Navigate to Settings
-                  },
-                ),
-                Spacer(), // Pushes the logout button to the bottom
-                Divider(color: Colors.white70),
-                _buildSidebarItem(
-                  icon: FontAwesomeIcons.signOutAlt,
-                  title: 'Logout',
-                  onTap: () {
-                    // Handle logout
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white),
-      title: Text(
-        title,
-        style: TextStyle(color: Colors.white),
-      ),
-      onTap: onTap,
-    );
-  }
-
   Widget _buildForm(BuildContext context, double screenHeight, double screenWidth) {
+    String? email = SessionManager.email;
+    String? age = SessionManager.age;
+    String? gender = SessionManager.gender;
+    String? phone = SessionManager.phone;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -258,6 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 onTap: () {
                   setState(() {
                     isEditable = !isEditable; // Toggle editable state
+                    showEditButton = isEditable; // Show edit text when form is editable
                   });
                 },
                 child: Row(
@@ -276,13 +180,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           Container(
             height: 45, // Adjust height as needed
             child: TextField(
               enabled: isEditable,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: email!,
                 labelStyle: TextStyle(color: Colors.white),
                 filled: true,
                 fillColor: isEditable
@@ -291,7 +197,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10), // Adjust padding inside the TextField
+                contentPadding:
+                EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               ),
               style: TextStyle(color: Colors.white),
             ),
@@ -300,62 +207,62 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(height: 10),
           // Phone Number Field
           Container(
-              height: 45,
-              child: TextField(
-                enabled: isEditable,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  labelStyle: TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: isEditable
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.2),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            height: 45,
+            child: TextField(
+              enabled: isEditable,
+              decoration: InputDecoration(
+                labelText: phone!,
+                labelStyle: TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: isEditable
+                    ? Colors.white.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: TextStyle(color: Colors.white),
               ),
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           SizedBox(height: 10),
           // Age Field
           Container(
-              height: 45,
-              child:TextField(
-                enabled: isEditable,
-                decoration: InputDecoration(
-                  labelText: 'Age',
-                  labelStyle: TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: isEditable
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.2),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            height: 45,
+            child: TextField(
+              enabled: isEditable,
+              decoration: InputDecoration(
+                labelText: age!,
+                labelStyle: TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: isEditable
+                    ? Colors.white.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: TextStyle(color: Colors.white),
               ),
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           SizedBox(height: 10),
           // Gender Field
           Container(
-              height: 45,
-              child:TextField(
-                enabled: isEditable,
-                decoration: InputDecoration(
-                  labelText: 'Gender',
-                  labelStyle: TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: isEditable
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.2),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            height: 45,
+            child: TextField(
+              enabled: isEditable,
+              decoration: InputDecoration(
+                labelText: gender!,
+                labelStyle: TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: isEditable
+                    ? Colors.white.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: TextStyle(color: Colors.white),
               ),
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           SizedBox(height: screenHeight * 0.04),
           // Conditionally show the Save button
@@ -386,85 +293,4 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  Widget _buildBottomBar(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Bottom navigation background
-        Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.black87, // Bottom bar color
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50),
-              topRight: Radius.circular(50),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItemBottom(Icons.home, 'Home'),
-              _buildNavItemBottom(Icons.track_changes, 'Track Calorie'),
-              SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.tips_and_updates, 'Plan'),
-              _buildNavItemBottom(Icons.calculate, 'Calculate BMI'),
-            ],
-          ),
-        ),
-        // Floating QR Code Button
-        Positioned(
-          top: -25, // Adjust the position for the larger size
-          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
-          child: Container(
-            width: 60, // Make the circle bigger
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white, // QR Button background color
-              shape: BoxShape.circle, // Ensures the circle shape
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                  offset: Offset(0, 4), // Adds subtle shadow
-                ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                Icons.qr_code,
-                size: 40, // Larger QR code icon
-                color: Colors.black, // QR code icon color
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItemBottom(IconData icon, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
-        SizedBox(height: 5),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
 }
-

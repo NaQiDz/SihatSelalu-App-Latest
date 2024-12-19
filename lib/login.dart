@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:SihatSelaluApp/home.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'choose.dart';
 import 'forgot_password.dart';
@@ -20,9 +22,12 @@ class LoginStylePage extends StatelessWidget {
   TextEditingController password = TextEditingController();
 
   Future<void> loginUser(BuildContext context) async {
+    await dotenv.load(fileName:'.env');
+    var serverIp;
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
       try {
-        String uri = "http://10.0.2.2/SihatSelaluAppDatabase/login.php";
+        serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+        String uri = "http://" + serverIp +"/SihatSelaluAppDatabase/login.php";
         var res = await http.post(
           Uri.parse(uri),
           headers: {"Content-Type": "application/json"},
@@ -31,27 +36,59 @@ class LoginStylePage extends StatelessWidget {
             "password": password.text,
           }),
         );
-        var response = jsonDecode(res.body);
 
-        if (response["success"] == "true") {
-          showPopup(context, "Success" , "Login successful!", loginSession:true);
-          // Navigate to the next page, e.g., HomePage
-          String username = response["data"]["username"];
-          String email = response["data"]["email"];
+        print("Response status: ${res.statusCode}");
+        print("Response body: ${res.body}");
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePageToUse(),
-            ),
-          );
+        if (res.statusCode == 200) {
+          var response;
+
+          try {
+            response = jsonDecode(res.body);
+          } catch (e) {
+            print("JSON parsing error: $e");
+            showPopup(context, "Error", "Invalid response from server.", loginSession: false);
+            return;
+          }
+
+          if (response["success"] == "true") {
+            // Save session
+            if (response["data"] != null &&
+                response["data"]["username"] != null &&
+                response["data"]["email"] != null) {
+              SessionManager.startSession(
+                response["token"] ?? "",
+                response["data"]["username"],
+                response["data"]["email"],
+                response["data"]["age"],
+                response["data"]["gender"],
+                response["data"]["email"],
+                response["data"]["phone"],
+              );
+              // Show success message and navigate
+              showPopup(context, "Success", "Login successful!", loginSession: true);
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePageToUse(),
+                ),
+              );
+            } else {
+              showPopup(context, "Error", "Invalid response data", loginSession: false);
+            }
+          } else {
+            showPopup(context, "Error", response["message"], loginSession: false);
+          }
         } else {
-          showPopup(context, "Error"  , response["message"], loginSession:false); // Show failure message
+          print("Unexpected status code: ${res.statusCode}");
+          showPopup(context, "Error", "Server error: ${res.statusCode}", loginSession: false);
         }
       } catch (e) {
-        print(e);
-        showPopup(context, "Error" , "An error occurred. Please try again.", loginSession:false);
+        print("Exception occurred: $e");
+        showPopup(context, "Error", "An error occurred. Please try again.", loginSession: false);
       }
+
     } else {
       showPopup(context, "Error" , "Please enter both username and password!", loginSession:false);
     }

@@ -1,5 +1,6 @@
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/iotsection.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:proste_bezier_curve/proste_bezier_curve.dart';
@@ -95,7 +96,10 @@ class chooseChildPage extends StatelessWidget {
   Widget _buildChildInputField(int count, String name, String age, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Add the navigation logic here
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => IOTPage()), // Replace with your actual ProfilePage
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),

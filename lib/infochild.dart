@@ -127,7 +127,7 @@ class InfoChildPage extends StatelessWidget {
 
   Widget _buildTextField(String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+      padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 15.0),
       child: TextField(
         enabled: false, // Makes the TextField non-editable
         decoration: InputDecoration(
