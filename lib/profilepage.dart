@@ -1,5 +1,7 @@
 import 'package:SihatSelaluApp/accountpage.dart';
-import 'package:SihatSelaluApp/homepage.dart';
+import 'package:SihatSelaluApp/bottombar.dart';
+import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -29,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
-      drawer: _buildSidebar(screenHeight),
+      drawer: const SideBar(),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -46,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(context, screenWidth),
+                const Header(),
                 SizedBox(height: screenHeight * 0.02),
                 CircleAvatar(
                   backgroundColor: Colors.transparent,
@@ -106,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
+      bottomNavigationBar: const BottomBar(),
     );
   }
 
