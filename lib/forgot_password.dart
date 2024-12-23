@@ -35,7 +35,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.0.145/SihatSelaluAppDatabase/forgot_password.php');
+    final url = Uri.parse('http://10.131.74.170/SihatSelaluAppDatabase/forgot_password.php');
     try {
       final response = await http.post(url, body: {'email': email}).timeout(Duration(seconds: 10));
 

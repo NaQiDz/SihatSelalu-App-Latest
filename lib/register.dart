@@ -54,7 +54,7 @@ class RegisterStylePage extends StatelessWidget {
         showPopup(context, "Error" , "Password must be 8-15 characters.", loginSession:false);
       } else {
         try {
-          String uri = "http://10.0.2.2/SihatSelaluAppDatabase/register.php";
+          String uri = "http://10.131.74.170/SihatSelaluAppDatabase/register.php";
           var res = await http.post(
             Uri.parse(uri),
             headers: {"Content-Type": "application/json"},
