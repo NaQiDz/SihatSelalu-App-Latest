@@ -1,7 +1,7 @@
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/components/theme_settings_screen.dart';
 import 'package:SihatSelaluApp/layout.dart';
-import 'package:SihatSelaluApp/theme/context.dart';
+import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'header.dart';
 
@@ -17,6 +17,7 @@ class BMIBarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(),
       // Remove AppBar and replace with Header widget
       body: Container(
         decoration: BoxDecoration(
@@ -30,7 +31,7 @@ class BMIBarPage extends StatelessWidget {
           child: Column(
             children: [
               // Header widget
-              Header(),
+              const Header(),
 
               // Expanded BMI components
               const Expanded(child: BMIAppLayout()),
