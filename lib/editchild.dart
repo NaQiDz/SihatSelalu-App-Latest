@@ -4,25 +4,99 @@ import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class EditChild extends StatelessWidget {
+class EditChildInformationScreen extends StatefulWidget {
+  final int childId; // You will need to pass this child ID to identify which child to update
+  const EditChildInformationScreen({Key? key, required this.childId}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: EditChildInformationScreen(),
-    );
-  }
+  _EditChildInformationScreenState createState() => _EditChildInformationScreenState();
 }
 
-class EditChildInformationScreen extends StatelessWidget {
+class _EditChildInformationScreenState extends State<EditChildInformationScreen> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController fullnameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController birthdayController = TextEditingController();
+  final TextEditingController widthController = TextEditingController();
+  final TextEditingController heightController = TextEditingController();
+  Map<String, dynamic>? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchChildData();  // Fetch existing data to display on the screen
+  }
+
+  void _fetchChildData() async {
+    // Fetch the data from the server using the childId
+    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/managechild.php');
+    final response = await http.post(url, body: {'childid': widget.childId.toString()});
+    userData = null;
+
+    if (response.statusCode == 200) {
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Child Data : $userData');
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic> && data['error'] == null) {
+        // Populate the controllers with the fetched data
+        setState(() {
+          userData = data;
+          nameController.text = userData?['child_username'];
+          fullnameController.text = userData?['child_fullname'];
+          ageController.text = userData?['child_dateofbirth'];
+          genderController.text = userData?['child_gender'];
+          birthdayController.text = userData?['child_dateofbirth'];
+          widthController.text = userData?['child_current_weight'];
+          heightController.text = userData?['child_current_height'];
+        });
+      } else {
+        _showResultDialog(context, 'Error', 'Failed to fetch child data');
+      }
+    } else {
+      _showResultDialog(context, 'Error', 'Server error: ${response.statusCode}');
+    }
+  }
+
+  void _updateChild() async {
+    // Prepare the data for sending to the server
+    Map<String, String> updatedData = {};
+
+    if (nameController.text.isNotEmpty) updatedData['name'] = nameController.text;
+    if (fullnameController.text.isNotEmpty) updatedData['fullname'] = fullnameController.text;
+    if (genderController.text.isNotEmpty) updatedData['gender'] = genderController.text;
+    if (birthdayController.text.isNotEmpty) updatedData['birthday'] = birthdayController.text;
+
+    updatedData['child_id'] = widget.childId.toString();  // Include child_id to identify which child to update
+
+    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/update_child.php');
+
+    final response = await http.post(url, body: updatedData);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['success']) {
+        _showResultDialog(context, 'Success', 'Child information updated successfully!');
+        _fetchChildData();
+      } else {
+        _showResultDialog(context, 'Failure', 'Failed to update child: ${data['message']}');
+      }
+    } else {
+      _showResultDialog(context, 'Error', 'Error: ${response.statusCode}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
+      backgroundColor: Colors.blue.shade900,
       drawer: const SideBar(),
       body: Container(
         width: double.infinity,
@@ -87,22 +161,16 @@ class EditChildInformationScreen extends StatelessWidget {
                         endIndent: screenWidth * 0.25,
                       ),
                       SizedBox(height: 40),
-                      _buildTextField('Akmal Hakim', 'Full Name'),
+                      _buildTextField(nameController, 'Nick Name', true),
                       SizedBox(height: 16),
-                      _buildTextField('22 years old','Age'),
+                      _buildTextField(fullnameController, 'Full Name', true),
                       SizedBox(height: 16),
-                      _buildTextField('Male','Gender'),
+                      _buildGenderDropdown(genderController, 'Gender', true),
                       SizedBox(height: 16),
-                      _buildTextField('09 September 2002','Birthday Date'),
-                      SizedBox(height: 16),
-                      _buildTextField('45 kg','Width'),
-                      SizedBox(height: 16),
-                      _buildTextField('125 cm','Height'),
+                      _buildDatePicker(birthdayController, 'Birthday Date', true),
                       SizedBox(height: 30),
                       ElevatedButton(
-                        onPressed: () {
-                          // Handle save action
-                        },
+                        onPressed: _updateChild,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade700,
                           padding: EdgeInsets.symmetric(
@@ -133,25 +201,138 @@ class EditChildInformationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String label, String hint) {
+  Widget _buildTextField(TextEditingController controller, String hint, bool isFilled) {
     return Container(
       width: 280,
-      height: 40,// Adjust width here
+      height: 50,
       child: TextField(
+        controller: controller,
+        enabled: isFilled,  // Disable input when isFilled is false
         decoration: InputDecoration(
-          labelText: label,
+          labelText: hint,
           labelStyle: TextStyle(color: Colors.grey[300], fontSize: 12),
-          filled: true,
+          filled: isFilled,
           fillColor: Colors.grey.withOpacity(0.2),
-          hintText: hint, // Add hint here
-          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 12), // Style the hint text
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
         ),
-        style: TextStyle(color: Colors.grey[300]),
+        style: TextStyle(color: Colors.grey[300], fontSize: 12),
       ),
+    );
+  }
+
+  Widget _buildGenderDropdown(TextEditingController controller, String hint, bool isFilled) {
+    return Container(
+      width: 280,
+      height: 50,
+      child: DropdownButtonFormField<String>(
+        value: controller.text.isEmpty ? null : controller.text, // Set initial value
+        onChanged: isFilled ? (String? newValue) {
+          controller.text = newValue!;
+        } : null, // Only allow selection if isFilled is true
+        decoration: InputDecoration(
+          labelText: hint,
+          labelStyle: TextStyle(color: Colors.grey[300], fontSize: 12),
+          filled: isFilled,
+          fillColor: Colors.grey.withOpacity(0.2),
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(color: Colors.grey[300], fontSize: 12),
+        items: ['Male', 'Female'].map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(TextEditingController controller, String hint, bool isFilled) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Adjust the padding as needed
+      child: Container(
+        width: 280,
+        height: 50,
+        child: TextField(
+          controller: controller,
+          enabled: isFilled, // Disable input if isFilled is false
+          readOnly: true, // Make the TextField read-only to open the calendar on tap
+          onTap: isFilled ? () async {
+            DateTime? selectedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            if (selectedDate != null) {
+              controller.text = "${selectedDate.toLocal()}".split(' ')[0]; // Set the date in text format
+            }
+          } : null, // Only allow selecting the date if isFilled is true
+          decoration: InputDecoration(
+            labelText: hint,
+            labelStyle: TextStyle(color: Colors.grey[300], fontSize: 12),
+            filled: isFilled,
+            fillColor: Colors.grey.withOpacity(0.2),
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: isFilled
+                ? IconButton(
+              icon: Icon(
+                FontAwesomeIcons.calendar, // FontAwesome calendar icon
+                color: Colors.grey[500],
+                size: 20,
+              ),
+              onPressed: () async {
+                DateTime? selectedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (selectedDate != null) {
+                  controller.text = "${selectedDate.toLocal()}".split(' ')[0];
+                }
+              },
+            )
+                : null, // Only show the calendar icon if isFilled is true
+          ),
+          style: TextStyle(color: Colors.grey[300], fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  void _showResultDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

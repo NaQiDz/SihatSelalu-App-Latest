@@ -2,10 +2,13 @@ import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/editchild.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/infochild.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'accountpage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ChildPage extends StatelessWidget {
   @override
@@ -17,7 +20,123 @@ class ChildPage extends StatelessWidget {
   }
 }
 
-class ChildrenPage extends StatelessWidget {
+class ChildrenPage extends StatefulWidget {
+  @override
+  _ChildrenPageState createState() => _ChildrenPageState();
+}
+
+class _ChildrenPageState extends State<ChildrenPage> {
+  String? username = SessionManager.username; // Hardcoded username
+  String? userid = SessionManager.userid; // Hardcoded username
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+  String? errorMessage;
+  List<dynamic>? childData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUser();
+    fetchChild();// Fetch data automatically on app start
+  }
+
+  Future<void> fetchUser() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      userData = null;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        body: {'username': username}, // Send the hardcoded username
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic> && data['error'] == null) {
+          setState(() {
+            userData = data;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            errorMessage = data['error'] ?? data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchChild() async {
+    if (userid == null) {
+      setState(() {
+        errorMessage = 'User ID is not available.';
+        isLoading = false;
+      });
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      errorMessage = null; // Clear previous error
+      childData = null; // Clear previous users data
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
+        body: {'userid': userid},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+            childData = data['datachild'];
+            isLoading = false;
+          });
+          print('Child Data : $childData');
+          // Show success message
+          /*ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data loaded successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3), // Adjust duration as needed
+            ),
+          );*/
+        }
+        else {
+          setState(() {
+            errorMessage = data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery
@@ -85,32 +204,37 @@ class ChildrenPage extends StatelessWidget {
                 SizedBox(height: screenHeight * 0.04),
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: screenHeight * 0.06,
-                      backgroundColor: Colors.grey,
-                      child: Text('Image'),
-                    ),
+                    if (userData?['Icon'] == null)
+                      CircleAvatar(
+                        radius: screenHeight * 0.06,
+                        backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                      ),
+                    if (userData?['Icon'] != null)
+                      CircleAvatar(
+                        radius: screenHeight * 0.06,
+                        backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                      ),
                     SizedBox(width: screenWidth * 0.04),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'YOUR NAME',
+                          (userData?['Username']?.toString() ?? 'loading..'),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          'Age',
+                          'Age      : ' + (userData?['Age']?.toString() ?? 'loading..') + ' Years',
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          'Gender',
+                          'Gender : ' + (userData?['Gender']?.toString() ?? 'loading..'),
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          'Parent',
+                          'Role     : Parent',
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -150,16 +274,110 @@ class ChildrenPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: screenHeight * 0.02),
                 Column(
                   children: [
-                    ChildItem(),
-                    ChildItem(),
-                    ChildItem(),
-                    ChildItem(),
-                    ChildItem(),
+                    const SizedBox(height: 20),
+
+                    // Check loading state or errors
+                    isLoading
+                        ? const CircularProgressIndicator()
+                        : errorMessage != null
+                        ? Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    )
+                        : childData != null
+                        ? SizedBox(
+                      height: 300, // Provide a fixed height or use MediaQuery for dynamic height
+                      child: ListView.builder(
+                        itemCount: childData!.length,
+                        itemBuilder: (context, index) {
+                          var child = childData![index];
+                          int age = calculateAge(child['child_dateofbirth']); // Calculate age
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigate to InfoChild page when the entire box is tapped
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => InfoChildPage(
+                                    childId: child['child_id'],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 8),
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(width: 5),
+                                      Text(
+                                        child['child_fullname'] ?? 'No Name',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Age: $age', // Display the calculated age
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      SizedBox(width: 2), // Space between the buttons
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EditChildInformationScreen(
+                                                  childId: child['child_id'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          shape: CircleBorder(), // Makes the button circular
+                                          minimumSize: Size(50, 50), // Ensure the button size is consistent (adjust as needed)
+                                        ),
+                                        child: Icon(Icons.edit, size: 20), // Icon size can be adjusted
+                                      ),
+                                      SizedBox(width: 0), // Space between the buttons
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          String childId = '123'; // Replace with actual child_id you want to delete
+                                          _deleteChild(context, child['child_id'].toString());
+                                          print('child id: ${child['child_id'].toString()}');
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: CircleBorder(),
+                                          minimumSize: Size(50, 50),
+                                        ),
+                                        child: Icon(Icons.delete, size: 20),
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                        : const SizedBox(), // Empty when no user data or error
                   ],
                 ),
+
               ],
             ),
           ),
@@ -169,10 +387,116 @@ class ChildrenPage extends StatelessWidget {
     );
   }
 
+  void _deleteChild(BuildContext context, String childId) async {
+    // Confirm deletion with a dialog
+    bool confirm = await _showConfirmationDialog(context) ?? false;
+
+    if (confirm) {
+      final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/delete_child.php');
+
+      final response = await http.post(
+        url,
+        body: {'child_id': childId}, // Sending child_id to delete
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success']) {
+          _showResultDialog(context, 'Success', 'Child deleted successfully!');
+          fetchChild();
+        } else {
+          _showResultDialog(context, 'Failure', 'Failed to delete child: ${data['message']}');
+        }
+      } else {
+        _showResultDialog(context, 'Error', 'Error: ${response.statusCode}');
+      }
+    }
+  }
+
+  Future<bool?> _showConfirmationDialog(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // Prevents dismissing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text('Are you sure you want to delete this child?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User chose not to delete
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User confirmed deletion
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Return false if dialog is dismissed
+  }
+
+
+  void _addChild(BuildContext context, String name, String fullname, String gender, String birthdate) async {
+    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/add_child.php');
+
+    final response = await http.post(
+      url,
+      body: {
+        'name': name,
+        'fullname': fullname,
+        'gender': gender,
+        'birthdate': birthdate,
+        'parentid': userid,
+      },
+    );
+    print('parentid $userid');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['success']) {
+        _showResultDialog(context, 'Success', 'Child added successfully!');
+        fetchChild();
+      } else {
+        _showResultDialog(context, 'Failure', 'Failed to add child: ${data['message']}');
+      }
+    } else {
+      _showResultDialog(context, 'Error', 'Error: ${response.statusCode}');
+    }
+  }
+
+// Function to show result dialog
+  void _showResultDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Function to show Add Child Dialog
   void _showAddChildDialog(BuildContext context) {
     final nameController = TextEditingController();
-    final ageController = TextEditingController();
+    final fullnameController = TextEditingController();
     final genderController = TextEditingController();
     final birthdateController = TextEditingController();
 
@@ -180,12 +504,12 @@ class ChildrenPage extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          titlePadding: EdgeInsets.all(20),
+          titlePadding: EdgeInsets.all(25),
           // Adjust title padding
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           // Adjust content padding
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Rounded corners
+            borderRadius: BorderRadius.circular(25), // Rounded corners
           ),
           backgroundColor: Colors.black.withOpacity(0.6),
           // Set dialog background color
@@ -206,59 +530,63 @@ class ChildrenPage extends StatelessWidget {
                 children: [
                   TextField(
                     controller: nameController,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                     // Text color for the input
                     decoration: InputDecoration(
-                      labelText: 'Child Name',
-                      labelStyle: TextStyle(color: Colors.white), // Label color
+                      labelText: 'Child Nick Name',
+                      labelStyle: TextStyle(color: Colors.white, fontSize: 12), // Label color
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when focused
+                        borderSide: BorderSide(color: Colors.white), // Border color when focused
                       ),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when enabled
+                        borderSide: BorderSide(color: Colors.white), // Border color when enabled
                       ),
                     ),
                   ),
                   TextField(
-                    controller: ageController,
-                    style: TextStyle(color: Colors.white),
+                    controller: fullnameController,
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                     // Text color for the input
                     decoration: InputDecoration(
-                      labelText: 'Child Age',
-                      // Add a label
-                      labelStyle: TextStyle(color: Colors.white),
-                      // Label text color
+                      labelText: 'Child Fullname',
+                      labelStyle: TextStyle(color: Colors.white, fontSize: 12), // Label color
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when focused
+                        borderSide: BorderSide(color: Colors.white), // Border color when focused
                       ),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when enabled
-                      ),
-                    ),
-                    keyboardType: TextInputType.number, // Ensures numeric input
-                  ),
-                  TextField(
-                    controller: genderController,
-                    style: TextStyle(color: Colors.white),
-                    // Text color for the input
-                    decoration: InputDecoration(
-                      labelText: 'Child Gender',
-                      labelStyle: TextStyle(color: Colors.white), // Label color
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when focused
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when enabled
+                        borderSide: BorderSide(color: Colors.white), // Border color when enabled
                       ),
                     ),
                   ),
-                  TextField(
+              DropdownButtonFormField<String>(
+                value: genderController.text.isNotEmpty ? genderController.text : null,
+                onChanged: (value) {
+                  genderController.text = value ?? ''; // Update the text controller with the selected value
+                },
+                style: TextStyle(color: Colors.white, fontSize: 12), // Text color for the dropdown items
+                decoration: InputDecoration(
+                  labelText: 'Child Gender',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 12), // Label color
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white), // Border color when focused
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white), // Border color when enabled
+                  ),
+                ),
+                dropdownColor: Colors.blueGrey, // Background color for dropdown menu
+                items: [
+                  DropdownMenuItem(
+                    value: 'Male',
+                    child: Text('Male', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Female',
+                    child: Text('Female', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  ),
+                ],
+              ),
+              TextField(
                     controller: birthdateController,
                     readOnly: true,
                     // Prevents manual editing
@@ -281,23 +609,20 @@ class ChildrenPage extends StatelessWidget {
 
                       if (pickedDate != null) {
                         birthdateController.text =
-                        "${pickedDate.month}/${pickedDate.day}/${pickedDate
-                            .year}";
+                        "${pickedDate.month}/${pickedDate.day}/${pickedDate.year}";
                       }
                     },
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                     // Input text color
                     decoration: InputDecoration(
                       labelText: 'Child Birthday Date',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: Colors.white, fontSize: 12),
                       // Label text color
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when focused
+                        borderSide: BorderSide(color: Colors.white), // Border color when focused
                       ),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors
-                            .white), // Border color when enabled
+                        borderSide: BorderSide(color: Colors.white), // Border color when enabled
                       ),
                     ),
                   ),
@@ -308,6 +633,27 @@ class ChildrenPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
+                final name = nameController.text;
+                final fullname = fullnameController.text;
+                final gender = genderController.text;
+                final birthdate = birthdateController.text;
+
+                _addChild(context, name, fullname, gender, birthdate);
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white, // Sets the text color to white
+              ),
+              child: Text(
+                'Add',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold, // Makes the text bold
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // You can save the child information here
                 Navigator.of(context).pop(); // Close the dialog
               },
               style: TextButton.styleFrom(
@@ -320,24 +666,6 @@ class ChildrenPage extends StatelessWidget {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                // You can save the child information here
-                String name = nameController.text;
-                String age = ageController.text;
-                print('Child Added: $name, $age');
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white, // Sets the text color to white
-              ),
-              child: Text(
-                'Add',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold, // Makes the text bold
-                ),
-              ),
-            ),
           ],
         );
       },
@@ -345,74 +673,20 @@ class ChildrenPage extends StatelessWidget {
   }
 }
 
-class ChildItem extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to ProfilePage when the entire box is tapped
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => InfoChild()), // Replace with your actual ProfilePage
-        );
-      },
-    child: Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              SizedBox(width: 5),
-              Text(
-                'Child name',
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Age',
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(width: 2), // Space between the buttons
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EditChild()
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: CircleBorder(), // Makes the button circular
-                  minimumSize: Size(50, 50), // Ensure the button size is consistent (adjust as needed)
-                ),
-                child: Icon(Icons.edit, size: 20), // Icon size can be adjusted
-              ),
-              SizedBox(width: 0), // Space between the buttons
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: CircleBorder(), // Makes the button circular
-                  minimumSize: Size(50, 50), // Ensure the button size is consistent (adjust as needed)
-                ),
-                child: Icon(Icons.delete, size: 20), // Icon size can be adjusted
-              ),
-            ],
-          )
-        ],
-      ),
-    ),
-    );
+int calculateAge(String birthDateString) {
+  // Parse the input string into a DateTime object
+  DateTime birthDate = DateTime.parse(birthDateString);
+  DateTime today = DateTime.now();
+
+  // Calculate the difference in years
+  int age = today.year - birthDate.year;
+
+  // Check if the birthday has not occurred yet this year
+  if (today.month < birthDate.month ||
+      (today.month == birthDate.month && today.day < birthDate.day)) {
+    age--;
   }
+
+  return age;
 }
+

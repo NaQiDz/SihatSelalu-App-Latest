@@ -1,30 +1,27 @@
 class SessionManager {
   static String? authToken;
   static String? username;
+  static String? userid;
   static String? email;
-  static String? age;
-  static String? gender;
-  static String? phone;
+  static String? icon;
 
   static bool isLoggedIn() {
     return authToken != null;
   }
 
-  static void startSession(String token, String user, String mail, String ageuser, String genderuser, String phnum, response) {
+  static void startSession(String token,String uid, String user, String mail, String ico) {
     authToken = token;
     username = user;
+    userid = uid;
     email = mail;
-    age = ageuser;
-    gender = genderuser;
-    phone = phnum;
+    icon = ico;
   }
 
   static void clearSession() {
     authToken = null;
     username = null;
+    userid = null;
     email = null;
-    age = null;
-    gender = null;
-    phone = null;
+    icon = null;
   }
 }

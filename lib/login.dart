@@ -58,12 +58,10 @@ class LoginStylePage extends StatelessWidget {
                 response["data"]["email"] != null) {
               SessionManager.startSession(
                 response["token"] ?? "",
+                response["data"]["userid"],
                 response["data"]["username"],
                 response["data"]["email"],
-                response["data"]["age"],
-                response["data"]["gender"],
-                response["data"]["email"],
-                response["data"]["phone"],
+                response["data"]["icon"],
               );
               // Show success message and navigate
               showPopup(context, "Success", "Login successful!", loginSession: true);
@@ -252,17 +250,23 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.withOpacity(0.8),
 
         title: Center(
-          child: Text(
-            textMessage,
-            style: TextStyle(color: loginSession ? Colors.green : Colors.red),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensures the column takes up minimal vertical space
+            children: [
+              Text(
+                textMessage,
+                style: TextStyle(color: loginSession ? Colors.green : Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8), // Adds spacing between the title and the message
+              Text(
+                message,
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ],
           ),
-        ),
-        content: Text(
-          message,
-          style: TextStyle(fontSize: 16),
         ),
       );
     },

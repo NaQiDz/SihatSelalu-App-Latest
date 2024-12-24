@@ -7,23 +7,81 @@ import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
-class AccountPage extends StatelessWidget {
+class Accountpage extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: accountpage(),
+      home: AccountPage(),
     );
   }
 }
 
-class accountpage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
+  @override
+  _AccountPageState createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  String? username = SessionManager.username;
+  String? email = SessionManager.email;
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUser(); // Fetch data automatically on app start
+  }
+
+  Future<void> fetchUser() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      userData = null;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        body: {'username': username}, // Send the hardcoded username
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic> && data['error'] == null) {
+          setState(() {
+            userData = data;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            errorMessage = data['error'] ?? data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    String? username = SessionManager.username;
-    String? email = SessionManager.email;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -80,11 +138,16 @@ class accountpage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: screenHeight * 0.02),
-                      CircleAvatar(
-                        radius: screenHeight * 0.05,
-                        backgroundColor: Colors.grey,
-                        child: Text('Image', style: TextStyle(color: Colors.black)),
-                      ),
+                      if (userData?['Icon'] == null)
+                        CircleAvatar(
+                          radius: screenHeight * 0.06,
+                          backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                        ),
+                      if (userData?['Icon'] != null)
+                        CircleAvatar(
+                          radius: screenHeight * 0.06,
+                          backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                        ),
                       SizedBox(height: screenHeight * 0.01),
                       Text(
                         username!.toUpperCase(),

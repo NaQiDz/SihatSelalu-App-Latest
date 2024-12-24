@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:SihatSelaluApp/choose.dart';
+import 'package:SihatSelaluApp/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:SihatSelaluApp/started.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'login.dart';
-
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -30,6 +29,8 @@ class RegisterStylePage extends StatelessWidget {
   TextEditingController confirmpassword = TextEditingController();
 
   Future<void> registerUser(BuildContext context) async {
+    await dotenv.load(fileName:'.env');
+    var serverIp;
     if (username.text.isNotEmpty &&
         emailControl.text.isNotEmpty &&
         phoneControl.text.isNotEmpty &&
@@ -54,8 +55,8 @@ class RegisterStylePage extends StatelessWidget {
         showPopup(context, "Error" , "Password must be 8-15 characters.", loginSession:false);
       } else {
         try {
-          String uri = "http://10.0.2.2/SihatSelaluAppDatabase/register.php";
-          var res = await http.post(
+          serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+          String uri = "http://" + serverIp +"/SihatSelaluAppDatabase/register.php";          var res = await http.post(
             Uri.parse(uri),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({
@@ -71,6 +72,7 @@ class RegisterStylePage extends StatelessWidget {
           var response = jsonDecode(res.body);
           if (response["success"] == "true") {
             showPopup(context, "Success", "Registration successful!", loginSession:true);
+
           } else {
             showPopup(context, "Error" , "Failed to register!", loginSession:false);
           }
@@ -188,11 +190,10 @@ bool isValidEmail(String email) {
 }
 
 bool isValidPhoneNumber(String phoneNumber) {
-  // Regular expression for Malaysian phone numbers
-  String pattern = r'^(01[0-9]-?\d{7,8}|0[3-9]-?\d{6,8})$';
+  // Modified regular expression to optionally accept "60" at the beginning
+  String pattern = r'^(60)?(01[0-9]-?\d{7,8}|0[3-9]-?\d{6,8})$';
   return RegExp(pattern).hasMatch(phoneNumber);
 }
-
 bool isValidPassword(String password) {
   return password.length >= 8 && password.length <= 15;
 }
@@ -224,7 +225,7 @@ Widget _buildTextField(BuildContext context, String label, TextInputType type,
           borderSide: BorderSide(color: Colors.blue, width: 2),
         ),
       ),
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.white, fontSize: 12),
     ),
   );
 }
@@ -271,6 +272,10 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
       Future.delayed(Duration(seconds: 2), () {
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
         }
       });
 
@@ -278,21 +283,62 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        backgroundColor: Colors.white,
-
+        backgroundColor: Colors.grey.withOpacity(0.8),
         title: Center(
-          child: Text(
-            textMessage,
-            style: TextStyle(color: loginSession ? Colors.green : Colors.red),
-          ),
-        ),
-        content: Center(
-          child: Text(
-            message,
-            style: TextStyle(fontSize: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensures the column takes up minimal vertical space
+            children: [
+              Text(
+                textMessage,
+                style: TextStyle(color: loginSession ? Colors.green : Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8), // Adds spacing between the title and the message
+              Text(
+                message,
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ],
           ),
         ),
       );
     },
   );
+}
+
+class MalaysiaPhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final newText = newValue.text;
+
+    if (newText.isEmpty) {
+      return newValue;
+    }
+
+    // Remove non-digit characters
+    String digitsOnly = newText.replaceAll(RegExp(r'\D'), '');
+
+    // Add prefix if not present
+    if (!digitsOnly.startsWith('60')) {
+      digitsOnly = '60' + digitsOnly;
+    }
+
+    // Format the number
+    String formattedNumber = '';
+    int digitIndex = 0;
+    for (int i = 0; i < digitsOnly.length; i++) {
+      if (i == 2) {
+        formattedNumber += ' '; // Space after 60
+      } else if (i == 5 || i == 8) {
+        formattedNumber += '-'; // Hyphens
+      }
+      formattedNumber += digitsOnly[digitIndex];
+      digitIndex++;
+    }
+
+    return TextEditingValue(
+      text: formattedNumber,
+      selection: TextSelection.collapsed(offset: formattedNumber.length),
+    );
+  }
 }
