@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(ChildHistoryApp());
@@ -74,9 +75,54 @@ class ChildHistoryPage extends StatelessWidget {
                       _buildSection(
                         context,
                         title: "Monthly Summary",
-                        content: Image.network(
-                          'https://storage.googleapis.com/a1aa/image/l6HPtf2svnzDPyL1TJpHXxUJOzXmkMevsfl8cMxQTfHAwUbPB.jpg',
-                          height: screenHeight * 0.2,
+                        content: BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: 100,
+                            barTouchData: BarTouchData(enabled: false),
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 28,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      value.toInt().toString(),
+                                      style: TextStyle(fontSize: 10, color: Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 28,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      (value.toInt() + 1).toString(),
+                                      style: TextStyle(fontSize: 10, color: Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            gridData: FlGridData(show: true),
+                            borderData: FlBorderData(show: true),
+                            barGroups: [
+                              BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 10, color: Colors.black)]),
+                              BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 20, color: Colors.black)]),
+                              BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 30, color: Colors.black)]),
+                              BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 40, color: Colors.black)]),
+                              BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 50, color: Colors.black)]),
+                              BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 60, color: Colors.black)]),
+                              BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 70, color: Colors.black)]),
+                              BarChartGroupData(x: 7, barRods: [BarChartRodData(toY: 80, color: Colors.black)]),
+                              BarChartGroupData(x: 8, barRods: [BarChartRodData(toY: 90, color: Colors.black)]),
+                              BarChartGroupData(x: 9, barRods: [BarChartRodData(toY: 60, color: Colors.black)]),
+                              BarChartGroupData(x: 10, barRods: [BarChartRodData(toY: 80, color: Colors.black)]),
+                              BarChartGroupData(x: 11, barRods: [BarChartRodData(toY: 100, color: Colors.black)]),
+                            ],
+                          ),
                         ),
                       ),
                     ],

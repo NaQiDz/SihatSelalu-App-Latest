@@ -30,7 +30,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     }
 
     try {
-      final url = Uri.parse('http://192.168.156.228/SihatSelaluAppDatabase/verify_code.php');
+      final url = Uri.parse('http://10.131.74.170/SihatSelaluAppDatabase/verify_code.php');
       final response = await http.post(
         url,
         body: {
