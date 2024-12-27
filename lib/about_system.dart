@@ -5,6 +5,8 @@ void main() {
 }
 
 class SihatSelaluApp extends StatelessWidget {
+  const SihatSelaluApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,6 +33,8 @@ class SihatSelaluApp extends StatelessWidget {
 }
 
 class SihatSelaluAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SihatSelaluAppBar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -50,7 +54,7 @@ class SihatSelaluAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class ProfileAvatar extends StatelessWidget {
-  const ProfileAvatar();
+  const ProfileAvatar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +68,8 @@ class ProfileAvatar extends StatelessWidget {
 }
 
 class IntroductionSection extends StatelessWidget {
+  const IntroductionSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ReusableSection(
@@ -75,6 +81,8 @@ class IntroductionSection extends StatelessWidget {
 }
 
 class BmiSection extends StatelessWidget {
+  const BmiSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ReusableSection(
@@ -87,6 +95,8 @@ class BmiSection extends StatelessWidget {
 }
 
 class HealthTipsSection extends StatelessWidget {
+  const HealthTipsSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ReusableSection(
@@ -108,7 +118,7 @@ class HealthTip extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const HealthTip({required this.icon, required this.text});
+  const HealthTip({super.key, required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +141,7 @@ class ReusableSection extends StatelessWidget {
   final String? imageUrl;
   final Widget? child;
 
-  const ReusableSection({
+  const ReusableSection({super.key, 
     required this.title,
     this.content,
     this.imageUrl,
@@ -181,6 +191,8 @@ class ReusableSection extends StatelessWidget {
 }
 
 class SihatSelaluBottomNavigationBar extends StatelessWidget {
+  const SihatSelaluBottomNavigationBar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(

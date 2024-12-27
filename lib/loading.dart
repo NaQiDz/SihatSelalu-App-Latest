@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'started.dart';
 
 class LoadingPage extends StatelessWidget {
+  const LoadingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,6 +14,8 @@ class LoadingPage extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }

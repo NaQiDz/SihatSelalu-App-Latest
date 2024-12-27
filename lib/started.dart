@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'choose.dart';
 
 class StartedPage extends StatelessWidget {
+  const StartedPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,6 +16,8 @@ class StartedPage extends StatelessWidget {
 }
 
 class MyStartedPage extends StatelessWidget {
+  const MyStartedPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Fetch screen height and width using MediaQuery

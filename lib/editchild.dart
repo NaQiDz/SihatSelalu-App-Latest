@@ -9,7 +9,7 @@ import 'dart:convert';
 
 class EditChildInformationScreen extends StatefulWidget {
   final int childId; // You will need to pass this child ID to identify which child to update
-  const EditChildInformationScreen({Key? key, required this.childId}) : super(key: key);
+  const EditChildInformationScreen({super.key, required this.childId});
 
   @override
   _EditChildInformationScreenState createState() => _EditChildInformationScreenState();
@@ -202,7 +202,7 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
   }
 
   Widget _buildTextField(TextEditingController controller, String hint, bool isFilled) {
-    return Container(
+    return SizedBox(
       width: 280,
       height: 50,
       child: TextField(
@@ -226,7 +226,7 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
   }
 
   Widget _buildGenderDropdown(TextEditingController controller, String hint, bool isFilled) {
-    return Container(
+    return SizedBox(
       width: 280,
       height: 50,
       child: DropdownButtonFormField<String>(
@@ -260,7 +260,7 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
   Widget _buildDatePicker(TextEditingController controller, String hint, bool isFilled) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0), // Adjust the padding as needed
-      child: Container(
+      child: SizedBox(
         width: 280,
         height: 50,
         child: TextField(

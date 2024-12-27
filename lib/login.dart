@@ -8,6 +8,8 @@ import 'choose.dart';
 import 'forgot_password.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,13 +23,15 @@ class LoginStylePage extends StatelessWidget {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
 
+  LoginStylePage({super.key});
+
   Future<void> loginUser(BuildContext context) async {
     await dotenv.load(fileName:'.env');
-    var serverIp;
+    String? serverIp;
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
       try {
         serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
-        String uri = "http://" + serverIp +"/SihatSelaluAppDatabase/login.php";
+        String uri = "http://$serverIp/SihatSelaluAppDatabase/login.php";
         var res = await http.post(
           Uri.parse(uri),
           headers: {"Content-Type": "application/json"},

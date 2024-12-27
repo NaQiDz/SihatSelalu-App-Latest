@@ -4,9 +4,100 @@ import 'package:SihatSelaluApp/iotsection.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:proste_bezier_curve/proste_bezier_curve.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:SihatSelaluApp/session_manager.dart';
 
-class chooseChildPage extends StatelessWidget {
-  const chooseChildPage({super.key});
+
+
+class childchoosePage extends StatelessWidget {
+  const childchoosePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ChildrenChoosePage(),
+    );
+  }
+}
+
+class ChildrenChoosePage extends StatefulWidget {
+  const ChildrenChoosePage({super.key});
+
+  @override
+  _ChooseChildrenPageState createState() => _ChooseChildrenPageState();
+}
+
+class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
+  _ChooseChildrenPageState();
+  String? username = SessionManager.username; // Hardcoded username
+  String? userid = SessionManager.userid; // Hardcoded username
+  bool isLoading = true;
+  String? errorMessage;
+  List<dynamic>? childData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChild();// Fetch data automatically on app start
+  }
+
+  Future<void> fetchChild() async {
+    if (userid == null) {
+      setState(() {
+        errorMessage = 'User ID is not available.';
+        isLoading = false;
+      });
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      errorMessage = null; // Clear previous error
+      childData = null; // Clear previous users data
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
+        body: {'userid': userid},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+            childData = data['datachild'];
+            isLoading = false;
+          });
+          print('Child Data : $childData');
+          /*ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data loaded successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3), // Adjust duration as needed
+            ),
+          );*/
+        }
+        else {
+          setState(() {
+            errorMessage = data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +108,6 @@ class chooseChildPage extends StatelessWidget {
       backgroundColor: Colors.white,
       drawer: const SideBar(),
       body: Container(
-        // Gradient Background
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -29,7 +119,6 @@ class chooseChildPage extends StatelessWidget {
           children: [
             Column(
               children: [
-                // Scrollable Section with Opacity Gradient
                 SingleChildScrollView(
                   padding: EdgeInsets.all(screenWidth * 0.04),
                   child: Column(
@@ -38,7 +127,6 @@ class chooseChildPage extends StatelessWidget {
                       const SizedBox(height: 30),
                       const Header(),
                       const SizedBox(height: 20),
-                      // Center the Text and CircleAvatar
                       Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -51,7 +139,7 @@ class chooseChildPage extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 10),
                             CircleAvatar(
                               radius: 35,
                               backgroundColor: Colors.grey.shade300,
@@ -64,21 +152,13 @@ class chooseChildPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      // Scrollable Section
-                      _buildChildInputField(1, 'Child Name', 'Age', context),
-                      const SizedBox(height: 10),
-                      _buildChildInputField(1, 'Child Name', 'Age', context),
-                      const SizedBox(height: 10),
-                      _buildChildInputField(1, 'Child Name', 'Age', context),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 4),
+                      _buildChildList(), // Extracted list logic
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Recently Used Section - Sticky at Bottom
             Positioned(
               bottom: 0,
               left: 0,
@@ -88,47 +168,103 @@ class chooseChildPage extends StatelessWidget {
           ],
         ),
       ),
-      // Bottom Navigation Bar
       bottomNavigationBar: const BottomBar(),
     );
   }
 
-  Widget _buildChildInputField(int count, String name, String age, BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => IOTPage()), // Replace with your actual ProfilePage
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-        // Adjust margin for spacing
-        height: 45,
-        // Set a custom height for the entire input field container
-        width: double.infinity,
-        // Make it take the full width of the screen
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(20),
+  /// Handles child list rendering
+  Widget _buildChildList() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              errorMessage!,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                // Add retry logic
+              },
+              child: const Text('Retry'),
+            ),
+          ],
         ),
-        child: ListTile(
-          leading: Text(
-            '$count.', // Convert count to string for proper display
-            style: TextStyle(color: Colors.white, fontSize: 14),
-          ),
-          title: Text(
-            '$name', // Display the name in the title section
-            style: TextStyle(color: Colors.white, fontSize: 14),
-          ),
-          trailing: Text(
-            'Age: $age', // Display the age in the trailing section
-            style: TextStyle(color: Colors.white, fontSize: 14),
-          ),
-        ),
+      );
+    }
+
+    if (childData == null) {
+      return const SizedBox(); // Empty state
+    }
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.5, // Adjust height dynamically
+      child: ListView.builder(
+        itemCount: childData!.length,
+        itemBuilder: (context, index) {
+          var child = childData![index];
+          int age = calculateAge(child['child_dateofbirth']); // Calculate age
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => IOTPage()), // Replace with your actual ProfilePage
+              );
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.height * 0.005, // Adjust vertical margin
+                horizontal: MediaQuery.of(context).size.width * 0.03, // Adjust horizontal margin
+              ),
+              padding: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.height * 0.00001, // Adjust vertical padding
+                horizontal: MediaQuery.of(context).size.width * 0.04, // Adjust horizontal padding
+              ),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: ListTile(
+                leading: Text(
+                  '${index + 1}.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
+                  ),
+                ),
+                title: Text(
+                  child['child_fullname'] ?? 'No Name',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
+                  ),
+                ),
+                trailing: Text(
+                  'Age: $age',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
+
+
+
 
   Widget _buildRecentlyUsedSection(BuildContext context) {
     return Positioned(
@@ -198,4 +334,21 @@ class chooseChildPage extends StatelessWidget {
       ),
     );
   }
+}
+
+int calculateAge(String birthDateString) {
+  // Parse the input string into a DateTime object
+  DateTime birthDate = DateTime.parse(birthDateString);
+  DateTime today = DateTime.now();
+
+  // Calculate the difference in years
+  int age = today.year - birthDate.year;
+
+  // Check if the birthday has not occurred yet this year
+  if (today.month < birthDate.month ||
+      (today.month == birthDate.month && today.day < birthDate.day)) {
+    age--;
+  }
+
+  return age;
 }

@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'login.dart'; // Import the login page
 
 class VerifyCodePage extends StatefulWidget {
+  const VerifyCodePage({super.key});
+
   @override
   _VerifyCodePageState createState() => _VerifyCodePageState();
 }

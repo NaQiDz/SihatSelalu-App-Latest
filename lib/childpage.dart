@@ -11,6 +11,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ChildPage extends StatelessWidget {
+  const ChildPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,6 +23,8 @@ class ChildPage extends StatelessWidget {
 }
 
 class ChildrenPage extends StatefulWidget {
+  const ChildrenPage({super.key});
+
   @override
   _ChildrenPageState createState() => _ChildrenPageState();
 }
@@ -226,11 +230,11 @@ class _ChildrenPageState extends State<ChildrenPage> {
                           ),
                         ),
                         Text(
-                          'Age      : ' + (userData?['Age']?.toString() ?? 'loading..') + ' Years',
+                          'Age      : ${userData?['Age']?.toString() ?? 'loading..'} Years',
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          'Gender : ' + (userData?['Gender']?.toString() ?? 'loading..'),
+                          'Gender : ${userData?['Gender']?.toString() ?? 'loading..'}',
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
@@ -521,7 +525,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                   color: Colors.white), // Adjust title font size
             ),
           ),
-          content: Container(
+          content: SizedBox(
             width: 600, // Adjust dialog width
             height: 240, // Adjust dialog height
             child: SingleChildScrollView(

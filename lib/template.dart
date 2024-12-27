@@ -9,6 +9,8 @@ void main() {
 }
 
 class TemplatePage extends StatelessWidget {
+  const TemplatePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,6 +21,8 @@ class TemplatePage extends StatelessWidget {
 }
 
 class TemplatePageToUse extends StatelessWidget {
+  const TemplatePageToUse({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;

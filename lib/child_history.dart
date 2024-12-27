@@ -7,6 +7,8 @@ void main() {
 }
 
 class ChildHistoryApp extends StatelessWidget {
+  const ChildHistoryApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,6 +19,8 @@ class ChildHistoryApp extends StatelessWidget {
 }
 
 class ChildHistoryPage extends StatelessWidget {
+  const ChildHistoryPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;

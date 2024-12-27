@@ -48,6 +48,8 @@ dependencies:
   gauge_indicator: ^0.4.3
   google_fonts: ^6.2.1
 
+  proste_bezier_curve: any
+  http_parser: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -58,7 +60,6 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.2
-  proste_bezier_curve: ^2.0.2
   flutter_radial_gauge: ^0.0.4
 
 flutter_launcher_icons:

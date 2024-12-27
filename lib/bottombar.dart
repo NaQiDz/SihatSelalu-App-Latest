@@ -4,7 +4,7 @@ import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({Key? key}) : super(key: key);
+  const BottomBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class BottomBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) =>
-                    chooseChildPage()), // Replace with the desired page
+                    childchoosePage()), // Replace with the desired page
               );
             },
             child: Container(
@@ -92,13 +92,11 @@ class BottomBar extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Check if targetPage is provided, and only navigate if it's not null
-        if (targetPage != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => targetPage),
-          );
-        }
-      },
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetPage),
+        );
+            },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,

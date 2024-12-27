@@ -9,9 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:http_parser/http_parser.dart';
 
 class Accountpage extends StatelessWidget {
+  const Accountpage({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,8 @@ class Accountpage extends StatelessWidget {
 }
 
 class AccountPage extends StatefulWidget {
+  const AccountPage({super.key});
+
   @override
   _AccountPageState createState() => _AccountPageState();
 }

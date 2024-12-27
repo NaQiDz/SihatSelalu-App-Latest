@@ -17,7 +17,9 @@ class MyApp extends StatelessWidget {
 }
 
 class HeightPage extends StatelessWidget {
-  final int number = 34; // Tukar number yg collect dari iot kat sini
+  final int number = 34;
+
+  const HeightPage({super.key}); // Tukar number yg collect dari iot kat sini
 
   @override
   Widget build(BuildContext context) {

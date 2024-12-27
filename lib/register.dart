@@ -7,6 +7,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatelessWidget {
+  const RegisterPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,9 +30,11 @@ class RegisterStylePage extends StatelessWidget {
   TextEditingController passwordCheck = TextEditingController();
   TextEditingController confirmpassword = TextEditingController();
 
+  RegisterStylePage({super.key});
+
   Future<void> registerUser(BuildContext context) async {
     await dotenv.load(fileName:'.env');
-    var serverIp;
+    String? serverIp;
     if (username.text.isNotEmpty &&
         emailControl.text.isNotEmpty &&
         phoneControl.text.isNotEmpty &&
@@ -56,7 +60,7 @@ class RegisterStylePage extends StatelessWidget {
       } else {
         try {
           serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
-          String uri = "http://" + serverIp +"/SihatSelaluAppDatabase/register.php";          var res = await http.post(
+          String uri = "http://$serverIp/SihatSelaluAppDatabase/register.php";          var res = await http.post(
             Uri.parse(uri),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({
@@ -320,7 +324,7 @@ class MalaysiaPhoneNumberFormatter extends TextInputFormatter {
 
     // Add prefix if not present
     if (!digitsOnly.startsWith('60')) {
-      digitsOnly = '60' + digitsOnly;
+      digitsOnly = '60$digitsOnly';
     }
 
     // Format the number

@@ -2,7 +2,6 @@ import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 void main() {
@@ -10,6 +9,8 @@ void main() {
 }
 
 class TemplatePage extends StatelessWidget {
+  const TemplatePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,6 +21,8 @@ class TemplatePage extends StatelessWidget {
 }
 
 class TemplatePageToUse extends StatefulWidget {
+  const TemplatePageToUse({super.key});
+
   @override
   State<TemplatePageToUse> createState() => _TemplatePageToUseState();
 }
@@ -77,7 +80,7 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
                     // Ruler Section (Left Side)
                     Expanded(
                       flex: 3, // Increased flex from 2 to 4
-                      child: Container(
+                      child: SizedBox(
                         height: screenHeight * 0.6, // Decreased height from 0.65 to 0.55
                         child: _buildRuler(),
                       ),
@@ -89,14 +92,18 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
                       child: Column(
                         children: [
                           // Radial Gauge Section
-                          Container(
+                          SizedBox(
                             height: screenHeight * 0.26, // Adjusted height for the radial gauge
                             child: _buildRadialGauge(),
                           ),
                           SizedBox(height: screenHeight * 0.02), // Space between sections
                           // Right Section with Info Rows
                           Container(
-                            height: screenHeight * 0.32, // Adjusted height for the info section
+                            height: screenHeight * 0.32,
+                            decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.6), // Background color for the container
+                              borderRadius: BorderRadius.circular(15),
+                            ), // Adjusted height for the info section
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -107,10 +114,6 @@ class _TemplatePageToUseState extends State<TemplatePageToUse> {
                                 SizedBox(height: screenHeight * 0.01),
                                 _buildInfoRow("Height", "123 cm"),
                               ],
-                            ),
-                            decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.6), // Background color for the container
-                              borderRadius: BorderRadius.circular(15),
                             ),
                           ),
                         ],

@@ -12,7 +12,7 @@ class BMIBarPage extends StatelessWidget {
       required Brightness brightness,
       required double contrast})? themeUpdater;
 
-  const BMIBarPage({this.themeUpdater, Key? key}) : super(key: key);
+  const BMIBarPage({this.themeUpdater, super.key});
 
   @override
   Widget build(BuildContext context) {

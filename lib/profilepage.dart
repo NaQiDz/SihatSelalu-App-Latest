@@ -13,6 +13,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http_parser/http_parser.dart';
 
 class Profilepage extends StatelessWidget {
+  const Profilepage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,6 +25,8 @@ class Profilepage extends StatelessWidget {
 }
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -356,7 +360,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildTextField({required String label, required bool isEditable}) {
-    return Container(
+    return SizedBox(
       height: 45,
       child: TextField(
         enabled: isEditable, // Now you can use isEditable directly
@@ -393,7 +397,7 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
-          content: Container(
+          content: SizedBox(
             width: 600,
             height: 240,
             child: SingleChildScrollView(
@@ -421,11 +425,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         // Rebuild the widget to update the selected image
                         (context as Element).reassemble();
                       },
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                       child: Text(
                         _image == null ? "Pick Image" : "Change Image",
                         style: TextStyle(color: Colors.white),
                       ),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     ),
                   ),
                 ],
@@ -480,7 +484,7 @@ class MalaysiaPhoneNumberFormatter extends TextInputFormatter {
 
     // Add prefix if not present
     if (!digitsOnly.startsWith('60')) {
-      digitsOnly = '60' + digitsOnly;
+      digitsOnly = '60$digitsOnly';
     }
 
     // Format the number

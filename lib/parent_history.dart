@@ -7,6 +7,8 @@ void main() {
 }
 
 class ParentHistoryPage extends StatelessWidget {
+  const ParentHistoryPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,6 +19,8 @@ class ParentHistoryPage extends StatelessWidget {
 }
 
 class ParentHistoryScreen extends StatelessWidget {
+  const ParentHistoryScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,6 +250,8 @@ class ParentHistoryScreen extends StatelessWidget {
 
 // BarChartSample widget (corrected code)
 class BarChartSample extends StatelessWidget {
+  const BarChartSample({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(

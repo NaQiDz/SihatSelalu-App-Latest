@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'started.dart';
 import 'login.dart';
 import 'register.dart';
 
 class ChoosePage extends StatelessWidget {
+  const ChoosePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

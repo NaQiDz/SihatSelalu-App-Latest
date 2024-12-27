@@ -10,7 +10,7 @@ import 'dart:convert';
 class InfoChildPage extends StatefulWidget {
   final int childId; // Accept childId as a parameter
 
-  const InfoChildPage({Key? key, required this.childId}) : super(key: key);
+  const InfoChildPage({super.key, required this.childId});
 
   @override
   _InfoChildPageState createState() => _InfoChildPageState();
@@ -40,7 +40,7 @@ class _InfoChildPageState extends State<InfoChildPage> {
         body: {'childid': widget.childId.toString()}, // Send the childId
 
       );
-      print('child id : ' + widget.childId.toString());
+      print('child id : ${widget.childId}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -48,7 +48,7 @@ class _InfoChildPageState extends State<InfoChildPage> {
           setState(() {
             userData = data; // Assuming your data structure contains a 'data' key
             isLoading = false;
-            print('Child info: ' + userData.toString());
+            print('Child info: $userData');
           });
         } else {
           setState(() {

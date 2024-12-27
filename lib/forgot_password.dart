@@ -5,6 +5,8 @@ import 'login.dart';
 import 'dart:convert';
 
 class ResetPassword extends StatelessWidget {
+  const ResetPassword({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,6 +17,8 @@ class ResetPassword extends StatelessWidget {
 }
 
 class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
+
   @override
   _ForgotPasswordState createState() => _ForgotPasswordState();
 }
