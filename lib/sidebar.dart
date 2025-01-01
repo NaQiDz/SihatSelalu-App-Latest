@@ -1,12 +1,15 @@
 import 'package:SihatSelaluApp/accountpage.dart';
 import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
+import 'package:SihatSelaluApp/settings_screen.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
@@ -16,6 +19,7 @@ class SideBar extends StatefulWidget {
 
 class _SideBarState extends State<SideBar> {
   String? username;
+  String? id;
   String? email;
   String? icon;
   Map<String, dynamic>? userData;
@@ -30,10 +34,16 @@ class _SideBarState extends State<SideBar> {
     fetchUser();
   }
 
-  void _loadSessionData() {
+  void _loadSessionData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = SessionManager.username ?? "Guest";
-      email = SessionManager.email ?? "example@mail.com";
+      final String? Email = prefs.getString('Email');
+      final String? ID = prefs.getString('ID');
+      final String? Username = prefs.getString('Username');
+
+      username = Username ?? "Guest";
+      email = Email ?? "example@mail.com";
+      id = ID;
     });
   }
 
@@ -142,6 +152,7 @@ class _SideBarState extends State<SideBar> {
               icon: FontAwesomeIcons.cog,
               title: 'Settings',
               onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
                 // Navigate to Settings
               },
             ),
@@ -150,7 +161,11 @@ class _SideBarState extends State<SideBar> {
             _buildSidebarItem(
               icon: FontAwesomeIcons.signOutAlt,
               title: 'Logout',
-              onTap: () {
+              onTap: () async{
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove('Email');
+                prefs.remove('ID');
+                prefs.remove('Username');
                 SessionManager.clearSession();
                 showPopup(context, "Logout", "You have been logged out", loginSession: false);
                 Navigator.pushAndRemoveUntil(

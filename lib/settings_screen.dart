@@ -1,3 +1,6 @@
+import 'package:SihatSelaluApp/profilepage.dart';
+import 'package:SihatSelaluApp/session_manager.dart';
+import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:SihatSelaluApp/header.dart';
@@ -32,23 +35,7 @@ class SettingsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Header(),
-                SizedBox(height: screenHeight * 0.02),
-                CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  child: Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.arrowLeft,
-                        color: Colors.white,
-                        size: 14,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context); // Navigate back to the previous screen
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.08),
                 const Text(
                   "Settings",
                   style: TextStyle(
@@ -67,6 +54,7 @@ class SettingsScreen extends StatelessWidget {
                       title: const Text("Profile", style: TextStyle(color: Colors.white)),
                       subtitle: const Text("Edit your profile details", style: TextStyle(color: Colors.white70)),
                       onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
                         // Add navigation or functionality for profile settings
                       },
                     ),
@@ -102,6 +90,13 @@ class SettingsScreen extends StatelessWidget {
                       leading: const Icon(Icons.logout, color: Colors.white),
                       title: const Text("Log Out", style: TextStyle(color: Colors.white)),
                       onTap: () {
+                        SessionManager.clearSession();
+                        showPopup(context, "Logout", "You have been logged out", loginSession: false);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => StartedPage()),
+                              (route) => false,
+                        );
                         // Add logout functionality
                       },
                     ),

@@ -1,4 +1,6 @@
+import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'started.dart';
 
 class LoadingPage extends StatelessWidget {
@@ -23,14 +25,33 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    super.initState();
+
     // Navigate to MainPage after 4 seconds
     Future.delayed(Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => StartedPage()),
-      );
+      getValidationData().whenComplete(() async {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => accessEmail == null && accessID == null && accessUsername == null ? StartedPage() : HomePage()),
+        );
+      });
     });
+    super.initState();
+  }
+  String? accessEmail;
+  String? accessID;
+  String? accessUsername;
+
+  Future getValidationData() async {
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var obtainEmail = sharedPreferences.getString('Email');
+    var obtainID = sharedPreferences.getString('ID');
+    var obtainUsername = sharedPreferences.getString('Username');
+    setState(() {
+      accessEmail = obtainEmail;
+      accessID = obtainID;
+      accessUsername = obtainUsername;
+    });
+    print('Email : $accessEmail ID: $accessID');
   }
 
   @override

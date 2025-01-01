@@ -8,6 +8,7 @@ import 'package:proste_bezier_curve/proste_bezier_curve.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:SihatSelaluApp/session_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -32,8 +33,6 @@ class ChildrenChoosePage extends StatefulWidget {
 
 class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
   _ChooseChildrenPageState();
-  String? username = SessionManager.username; // Hardcoded username
-  String? userid = SessionManager.userid; // Hardcoded username
   bool isLoading = true;
   String? errorMessage;
   List<dynamic>? childData;
@@ -45,6 +44,10 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
   }
 
   Future<void> fetchChild() async {
+    String userid;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? ID = prefs.getString('ID');
+    userid = ID.toString();
     await dotenv.load(fileName:'.env');
     String? serverIp;
     if (userid == null) {

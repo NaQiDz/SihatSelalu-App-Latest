@@ -4,6 +4,7 @@ import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'choose.dart';
 import 'forgot_password.dart';
 
@@ -26,6 +27,7 @@ class LoginStylePage extends StatelessWidget {
   LoginStylePage({super.key});
 
   Future<void> loginUser(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await dotenv.load(fileName:'.env');
     String? serverIp;
     if (username.text.isNotEmpty && password.text.isNotEmpty) {
@@ -67,6 +69,16 @@ class LoginStylePage extends StatelessWidget {
                 response["data"]["email"],
                 response["data"]["icon"],
               );
+
+              String Email = response["data"]["email"];
+              String Username = response["data"]["username"];
+              String ID = response["data"]["userid"].toString();
+
+              print('Email : $Email ID: $ID');
+              prefs.setString('Email', Email);
+              prefs.setString('ID', ID);
+              prefs.setString('Username', Username);
+
               // Show success message and navigate
               showPopup(context, "Success", "Login successful!", loginSession: true);
 
