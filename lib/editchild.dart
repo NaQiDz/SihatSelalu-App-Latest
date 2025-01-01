@@ -3,6 +3,7 @@ import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -32,8 +33,11 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
   }
 
   void _fetchChildData() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
     // Fetch the data from the server using the childId
-    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/managechild.php');
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/managechild.php');
     final response = await http.post(url, body: {'childid': widget.childId.toString()});
     userData = null;
 
@@ -63,6 +67,10 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
   }
 
   void _updateChild() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
     // Prepare the data for sending to the server
     Map<String, String> updatedData = {};
 
@@ -73,7 +81,7 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
 
     updatedData['child_id'] = widget.childId.toString();  // Include child_id to identify which child to update
 
-    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/update_child.php');
+    final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/update_child.php');
 
     final response = await http.post(url, body: updatedData);
 
@@ -250,7 +258,10 @@ class _EditChildInformationScreenState extends State<EditChildInformationScreen>
         items: ['Male', 'Female'].map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
-            child: Text(value),
+            child: Container(
+              width: 100, // Adjust width of the dropdown menu
+              child: Text(value, style: TextStyle(fontSize: 12)),
+            ),
           );
         }).toList(),
       ),

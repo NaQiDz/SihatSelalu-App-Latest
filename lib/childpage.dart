@@ -5,6 +5,7 @@ import 'package:SihatSelaluApp/infochild.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'accountpage.dart';
 import 'dart:convert';
@@ -45,6 +46,10 @@ class _ChildrenPageState extends State<ChildrenPage> {
   }
 
   Future<void> fetchUser() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -53,7 +58,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
         body: {'username': username}, // Send the hardcoded username
       );
 
@@ -85,6 +90,10 @@ class _ChildrenPageState extends State<ChildrenPage> {
   }
 
   Future<void> fetchChild() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
     if (userid == null) {
       setState(() {
         errorMessage = 'User ID is not available.';
@@ -100,7 +109,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/try.php'), // Replace with your URL
         body: {'userid': userid},
       );
 

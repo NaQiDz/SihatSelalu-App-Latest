@@ -3,6 +3,7 @@ import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/iotsection.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:proste_bezier_curve/proste_bezier_curve.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -44,6 +45,8 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
   }
 
   Future<void> fetchChild() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
     if (userid == null) {
       setState(() {
         errorMessage = 'User ID is not available.';
@@ -58,8 +61,9 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
     });
 
     try {
+      serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/try.php'), // Replace with your URL
         body: {'userid': userid},
       );
 

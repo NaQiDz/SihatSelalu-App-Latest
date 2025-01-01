@@ -3,13 +3,13 @@ import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
-
   @override
   _SideBarState createState() => _SideBarState();
 }
@@ -38,14 +38,17 @@ class _SideBarState extends State<SideBar> {
   }
 
   Future<void> fetchUser() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
     setState(() {
       isLoading = true;
       errorMessage = null;
       userData = null;
     });
     try {
+      serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'),
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'),
         body: {'username': username},
       );
 
@@ -67,6 +70,11 @@ class _SideBarState extends State<SideBar> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Replace the hardcoded IP with the dynamically loaded serverIp
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
+
     return Drawer(
       child: Container(
         padding: EdgeInsets.all(screenHeight * 0.01),
@@ -83,15 +91,19 @@ class _SideBarState extends State<SideBar> {
                 children: [
                   SizedBox(height: screenHeight * 0.05),
                   if (userData?['Icon'] == null)
-                  CircleAvatar(
-                    radius: screenHeight * 0.04,
-                    backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'),
-                  ),
+                    CircleAvatar(
+                      radius: screenHeight * 0.04,
+                      backgroundImage: NetworkImage(
+                        'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
+                      ),
+                    ),
                   if (userData?['Icon'] != null)
-                  CircleAvatar(
-                    radius: screenHeight * 0.04,
-                    backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']),
-                  ),
+                    CircleAvatar(
+                      radius: screenHeight * 0.04,
+                      backgroundImage: NetworkImage(
+                        'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon']}',
+                      ),
+                    ),
                   SizedBox(height: screenHeight * 0.02),
                   Text(
                     'Welcome, $username!',
@@ -153,6 +165,7 @@ class _SideBarState extends State<SideBar> {
       ),
     );
   }
+
 
   Widget _buildSidebarItem({
     required IconData icon,
