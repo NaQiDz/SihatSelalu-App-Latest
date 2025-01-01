@@ -1,0 +1,79 @@
+#include "HX711.h"
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <ArduinoJson.h>
+
+// WiFi credentials
+const char* ssid = "Tak Tahu Saya";
+const char* password = "aqpontaktahu";
+
+ESP8266WebServer server(80);
+
+// HX711 circuit wiring
+const int LOADCELL_DOUT_PIN = 2; // GPIO2 (D4 on NodeMCU)
+const int LOADCELL_SCK_PIN = 0;  // GPIO0 (D3 on NodeMCU)
+
+HX711 scale;
+
+// Define calibration factor (adjust this after calibration)
+float calibration_factor = 40000.0;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Initializing HX711...");
+
+  // Initialize WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConnected to WiFi");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  // Initialize HX711
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+
+  // Check HX711 readiness
+  unsigned long startMillis = millis();
+  while (!scale.is_ready()) {
+    if (millis() - startMillis > 5000) { // Timeout after 5 seconds
+      Serial.println("Error: HX711 not detected. Check wiring and power.");
+      return;
+    }
+    yield();
+  }
+
+  Serial.println("HX711 detected. Taring the scale. Remove all weight...");
+  delay(3000); // Wait for user to remove weight
+  scale.tare(); // Tare to reset weight to 0
+  Serial.println("Tare successful.");
+
+  // Set up HTTP server
+  server.on("/weight", []() {
+    if (scale.is_ready()) {
+      scale.set_scale(calibration_factor);
+      float raw_weight = scale.get_units(10); // Average of 10 readings
+      float weight = (raw_weight > -0.05 && raw_weight < 0.05) ? 0.0 : raw_weight; // Ensure 0 for small noise
+
+      // Create a JSON object
+      StaticJsonDocument<200> doc;
+      doc["weight"] = weight;
+      doc["unit"] = "kg";
+
+      String response;
+      serializeJson(doc, response);
+      server.send(200, "application/json", response);
+    } else {
+      server.send(500, "application/json", "{\"error\":\"HX711 not ready\"}");
+    }
+  });
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+
+void loop() {
+  server.handleClient(); // Handle incoming HTTP requests
+}
