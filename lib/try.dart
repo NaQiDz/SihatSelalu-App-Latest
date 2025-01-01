@@ -1,129 +1,71 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MaterialApp(
+    home: WeightScreen(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class WeightScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter XAMPP Example',
-      home: HomePage(),
-    );
-  }
+  _WeightScreenState createState() => _WeightScreenState();
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class _WeightScreenState extends State<WeightScreen> {
+  String _weight = "Loading...";
+  Timer? _timer;
 
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final _usernameController = TextEditingController();
-  List<dynamic>? childData; // Store fetched users data
-  bool isLoading = false;
-  String? errorMessage;
-
-  Future<void> fetchUser(String userid) async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null; // Clear previous error
-      childData = null; // Clear previous users data
-    });
-
+  Future<void> fetchWeight() async {
+    final url = Uri.parse('http://172.20.10.2/weight'); // Replace with your ESP8266's IP address
     try {
-      final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
-        body: {'userid': userid},
-      );
-
+      final response = await http.get(url);
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == 'success') {
-          setState(() {
-            childData = data['data']; // Assign the list of users to userData
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            errorMessage = data['message'] ?? 'An error occurred';
-            isLoading = false;
-          });
-        }
-      } else {
+        final data = json.decode(response.body);
+        double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
         setState(() {
-          errorMessage = 'Request failed with status: ${response.statusCode}.';
-          isLoading = false;
+          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}"; // Format to 2 decimal places
         });
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: $e';
-        isLoading = false;
+        _weight = "Error: $e";
       });
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fetch User by Username'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (_usernameController.text.isNotEmpty) {
-                  fetchUser(_usernameController.text);
-                }
-              },
-              child: const Text('Fetch User'),
-            ),
-            const SizedBox(height: 20),
-            isLoading
-                ? const CircularProgressIndicator()
-                : errorMessage != null
-                ? Text(errorMessage!, style: const TextStyle(color: Colors.red))
-                : childData != null
-                ? Expanded(
-              child: ListView.builder(
-                itemCount: childData!.length,
-                itemBuilder: (context, index) {
-                  var child = childData![index];
-                  return ListTile(
-                    title: Text(child['child_fullname'] ?? 'No Name'),
-                    subtitle: Text('Age: ${child['child_dateofbirth']}'),
-                  );
-                },
-              ),
-            )
-                : const SizedBox(), // Empty when no user data or error
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    // Start a timer to refresh the weight every second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      fetchWeight();
+    });
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    // Cancel the timer when the widget is disposed
+    _timer?.cancel();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Weight Display")),
+      body: Center(
+        child: Text(
+          _weight,
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: fetchWeight,
+        child: Icon(Icons.refresh),
+      ),
+    );
   }
 }
