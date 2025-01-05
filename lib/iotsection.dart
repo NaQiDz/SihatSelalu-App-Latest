@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
@@ -25,6 +28,46 @@ class IOTPageToUse extends StatefulWidget {
 }
 
 class _IOTPageToUse extends State<IOTPageToUse> {
+  String _weight = "Loading...";
+  double weightAsDouble = 0.00;
+  Timer? _timer;
+
+  Future<void> fetchWeight() async {
+    final url = Uri.parse('http://172.20.10.2/weight'); // Replace with your ESP8266's IP address
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
+        setState(() {
+          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}"; // Format to 2 decimal places
+          String numericPart = _weight.split(' ')[0];
+          weightAsDouble = double.parse(numericPart);
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _weight = "Error: $e";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Start a timer to refresh the weight every second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      fetchWeight();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -69,6 +112,71 @@ class _IOTPageToUse extends State<IOTPageToUse> {
                     ),
                   ),
                 ),
+                SizedBox(height: screenHeight * 0.02),
+                Center(
+                  child: Center(
+                    child: Container(
+                      height: screenHeight * 0.2, // Increased height to accommodate text fields
+                      width: screenWidth * 0.9, // Adjust width as needed
+                      padding: const EdgeInsets.all(10), // Padding around the gauge
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.6), // Slightly less transparent background
+                        borderRadius: BorderRadius.circular(15), // Rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute space evenly
+                        crossAxisAlignment: CrossAxisAlignment.start, // Align text fields to the start
+                        children: [
+                          // Name Text Field
+                          TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.2),
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                          ),
+                          // Gender Text Field
+                          TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Gender',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.2),
+                              prefixIcon: Icon(Icons.wc),
+                            ),
+                          ),
+                          // Age Text Field
+                          TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Age',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.2),
+                              prefixIcon: Icon(Icons.calendar_today),
+                            ),
+                            keyboardType: TextInputType.number, // Numeric input for age
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
                 SizedBox(height: screenHeight * 0.02),
                 // Row for Ruler and other content
                 Row(
@@ -190,22 +298,6 @@ class _IOTPageToUse extends State<IOTPageToUse> {
                     )
                   ],
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                // Row for Ruler and other content
-                Center(
-                  child: Center(
-                    child: Container(
-                      height: screenHeight * 0.15, // Equal height for both gauges
-                      width: screenWidth * 0.9, // Adjust width as needed
-                      padding: const EdgeInsets.all(10), // Padding around the gauge
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6), // Background color for the container
-                        borderRadius: BorderRadius.circular(15), // Rounded corners
-                      ),
-                    ),
-                  ),
-                ),
-                // Adjusted SizedBox height here
               ],
             ),
           ),
@@ -270,7 +362,7 @@ class _IOTPageToUse extends State<IOTPageToUse> {
             minimum: 0,
             maximum: 200,
             pointers: <GaugePointer>[
-              NeedlePointer(value: 0, enableAnimation: true),
+              NeedlePointer(value: weightAsDouble, enableAnimation: true),
             ],
             ranges: <GaugeRange>[
               GaugeRange(startValue: 0, endValue: 50, color: Colors.yellow),

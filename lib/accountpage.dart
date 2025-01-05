@@ -1,3 +1,4 @@
+import 'package:SihatSelaluApp/about_system.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/header.dart';
@@ -377,7 +378,7 @@ class _AccountPageState extends State<AccountPage> {
         // Navigate to ProfilePage when the entire box is tapped
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProfilePage()), // Replace with your actual ProfilePage
+          MaterialPageRoute(builder: (context) => AboutUs()), // Replace with your actual ProfilePage
         );
       },
       child: Container(

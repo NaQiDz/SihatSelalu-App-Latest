@@ -15,7 +15,7 @@ class BottomBar extends StatelessWidget {
         Container(
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.black87, // Bottom bar color
+            color: Colors.black87, // Bottom bar color (use same color as gradient or transparency)
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(50),
               topRight: Radius.circular(50),
@@ -37,25 +37,20 @@ class BottomBar extends StatelessWidget {
                   // For now, it's a placeholder that does nothing
                 },
               ),
-              )
-
+              ),
             ],
           ),
         ),
         // Floating Button
         Positioned(
           top: -25, // Adjust the position for the larger size
-          left: MediaQuery
-              .of(context)
-              .size
-              .width / 2 - 30, // Center it properly
+          left: MediaQuery.of(context).size.width / 2 - 30, // Center it properly
           child: GestureDetector( // Wrap it in GestureDetector to handle tap
             onTap: () {
               // Navigate to the new page when the button is clicked
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>
-                    childchoosePage()), // Replace with the desired page
+                MaterialPageRoute(builder: (context) => childchoosePage()), // Replace with the desired page
               );
             },
             child: Container(
@@ -83,7 +78,6 @@ class BottomBar extends StatelessWidget {
             ),
           ),
         ),
-
       ],
     );
   }
@@ -96,7 +90,7 @@ class BottomBar extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) => targetPage),
         );
-            },
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,

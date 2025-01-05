@@ -1,71 +1,60 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(MaterialApp(
-    home: WeightScreen(),
-  ));
+class SlidingTextBox extends StatefulWidget {
+  @override
+  _SlidingTextBoxState createState() => _SlidingTextBoxState();
 }
 
-class WeightScreen extends StatefulWidget {
-  @override
-  _WeightScreenState createState() => _WeightScreenState();
-}
-
-class _WeightScreenState extends State<WeightScreen> {
-  String _weight = "Loading...";
-  Timer? _timer;
-
-  Future<void> fetchWeight() async {
-    final url = Uri.parse('http://172.20.10.2/weight'); // Replace with your ESP8266's IP address
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
-        setState(() {
-          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}"; // Format to 2 decimal places
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _weight = "Error: $e";
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Start a timer to refresh the weight every second
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      fetchWeight();
-    });
-  }
-
-  @override
-  void dispose() {
-    // Cancel the timer when the widget is disposed
-    _timer?.cancel();
-    super.dispose();
-  }
+class _SlidingTextBoxState extends State<SlidingTextBox> {
+  double _position = 0.0; // Initial position of the text box
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width for responsive design
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(title: Text("Weight Display")),
-      body: Center(
-        child: Text(
-          _weight,
-          style: TextStyle(fontSize: 24),
-        ),
+      appBar: AppBar(
+        title: Text('Sliding Text Box'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: fetchWeight,
-        child: Icon(Icons.refresh),
+      body: Center(
+        child: GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              // Update position based on the horizontal drag
+              _position += details.primaryDelta!;
+              // Constrain the movement to the screen width
+              _position = _position.clamp(0.0, screenWidth - 200); // Ensure it doesn't slide out
+            });
+          },
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300), // Smooth transition duration
+            curve: Curves.easeInOut, // Smooth transition curve
+            width: 200, // Set the width of the text box
+            height: 100, // Set the height of the text box
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'Slide Me!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ),
     );
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: SlidingTextBox(),
+  ));
 }

@@ -52,7 +52,7 @@ class RegisterStylePage extends StatelessWidget {
       } else if (!isValidEmail(email)) {
         showPopup(context, "Error" , "Please enter a valid email.", loginSession:false);
       }else if (!isValidPhoneNumber(phone)) {
-        showPopup(context, "Error"  , "Phone number is not valid!.", loginSession:false);
+        showPopup(context, "Error"  , "Phone number is not valid!. \nPlease enter like 601X-XXXXXXX", loginSession:false);
       }else if (!isValidTwoDigitNumber(age)) {
         showPopup(context, "Error" , "Invalid age, age must be 2 digit of number!.", loginSession:false);
       }else if (!isValidPassword(password)) {
@@ -194,10 +194,17 @@ bool isValidEmail(String email) {
 }
 
 bool isValidPhoneNumber(String phoneNumber) {
-  // Modified regular expression to optionally accept "60" at the beginning
-  String pattern = r'^(60)?(01[0-9]-?\d{7,8}|0[3-9]-?\d{6,8})$';
-  return RegExp(pattern).hasMatch(phoneNumber);
+  // Use the formatter to preprocess the phone number
+  String formattedNumber = MalaysiaPhoneNumberFormatter().formatEditUpdate(
+    TextEditingValue.empty,
+    TextEditingValue(text: phoneNumber),
+  ).text;
+
+  // Define the pattern for a valid Malaysian phone number
+  String pattern = r'^(60)\s(01[0-9]-\d{7,8}|0[3-9]-\d{6,8})$';
+  return RegExp(pattern).hasMatch(formattedNumber);
 }
+
 bool isValidPassword(String password) {
   return password.length >= 8 && password.length <= 15;
 }
@@ -274,11 +281,13 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
     builder: (BuildContext context) {
       // Automatically close the dialog after 2 seconds
       Future.delayed(Duration(seconds: 2), () {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Close the popup
+        if (loginSession) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(
+              builder: (context) => LoginPage(),
+            ),
           );
         }
       });
@@ -308,6 +317,7 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
     },
   );
 }
+
 
 class MalaysiaPhoneNumberFormatter extends TextInputFormatter {
   @override

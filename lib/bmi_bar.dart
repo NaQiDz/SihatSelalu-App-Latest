@@ -18,7 +18,7 @@ class BMIBarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const SideBar(),
-      // Remove AppBar and replace with Header widget
+      backgroundColor: Colors.blue.shade900, // Set the background color here
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -35,15 +35,14 @@ class BMIBarPage extends StatelessWidget {
 
               // Expanded BMI components
               const Expanded(child: BMIAppLayout()),
-
-              // Ensure bottom navigation bar stays fixed at the bottom
-              const BottomBar(),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: const BottomBar(),
     );
   }
+
 
   void _showThemeOptions(BuildContext context) {
     if (themeUpdater != null) {

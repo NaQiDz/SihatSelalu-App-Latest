@@ -48,6 +48,10 @@ class _SideBarState extends State<SideBar> {
   }
 
   Future<void> fetchUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? Username = prefs.getString('Username');
+
+    String? username = Username;
     await dotenv.load(fileName:'.env');
     String? serverIp;
     setState(() {

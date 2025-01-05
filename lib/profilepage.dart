@@ -33,9 +33,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? username;
-  String? email;
-  String? id;
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
@@ -43,20 +40,19 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _loadSessionData();
     fetchUser(); // Fetch data automatically on app start
+    _loadSessionData();
   }
+
+  String? username2;
 
   void _loadSessionData() async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      final String? Email = prefs.getString('Email');
-      final String? ID = prefs.getString('ID');
       final String? Username = prefs.getString('Username');
 
-      username = Username ?? "Guest";
-      email = Email ?? "example@mail.com";
-      id = ID;
+      username2 = Username;
+
     });
   }
 
@@ -74,7 +70,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _uploadImage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_image == null) return;
+    final String? Email = prefs.getString('Email');
+    final String? ID = prefs.getString('ID');
+    final String? Username = prefs.getString('Username');
+
+    String? username = Username;
 
     final uri = Uri.parse("http://172.20.10.3/SihatSelaluAppDatabase/upload.php");
     var request = http.MultipartRequest('POST', uri)
@@ -111,14 +113,9 @@ class _ProfilePageState extends State<ProfilePage> {
       errorMessage = null;
       userData = null;
     });
-
-    final String? Email = prefs.getString('Email');
-    final String? ID = prefs.getString('ID');
     final String? Username = prefs.getString('Username');
 
-    username = Username ?? "Guest";
-    email = Email ?? "example@mail.com";
-    id = ID;
+    String? username = Username;
 
     try {
       final response = await http.post(
@@ -160,7 +157,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    String? username = SessionManager.username;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -274,7 +270,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       SizedBox(height: screenHeight * 0.02),
                       Text(
-                        username!.toUpperCase(),
+                        username2!.toUpperCase(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -368,7 +364,7 @@ class _ProfilePageState extends State<ProfilePage> {
         enabled: false, // Now you can use isEditable directly
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.white),
+          labelStyle: TextStyle(color: Colors.white, fontSize: 13),
           filled: true,
           fillColor: Colors.grey.withOpacity(0.2),
           border: OutlineInputBorder(
