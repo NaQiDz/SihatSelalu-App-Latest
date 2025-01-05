@@ -112,20 +112,13 @@ class ChildHistoryPage extends StatelessWidget {
                             ),
                             gridData: FlGridData(show: true),
                             borderData: FlBorderData(show: true),
-                            barGroups: [
-                              BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 10, color: Colors.black)]),
-                              BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 20, color: Colors.black)]),
-                              BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 30, color: Colors.black)]),
-                              BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 40, color: Colors.black)]),
-                              BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 50, color: Colors.black)]),
-                              BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 60, color: Colors.black)]),
-                              BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 70, color: Colors.black)]),
-                              BarChartGroupData(x: 7, barRods: [BarChartRodData(toY: 80, color: Colors.black)]),
-                              BarChartGroupData(x: 8, barRods: [BarChartRodData(toY: 90, color: Colors.black)]),
-                              BarChartGroupData(x: 9, barRods: [BarChartRodData(toY: 60, color: Colors.black)]),
-                              BarChartGroupData(x: 10, barRods: [BarChartRodData(toY: 80, color: Colors.black)]),
-                              BarChartGroupData(x: 11, barRods: [BarChartRodData(toY: 100, color: Colors.black)]),
-                            ],
+                            barGroups: List.generate(
+                              12,
+                                  (index) {
+                                final heights = [10, 20, 30, 40, 50, 60, 70, 80, 90, 60, 80, 100];
+                                return generateBarChartGroupData(index, heights[index].toDouble(), Colors.black);
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -262,6 +255,15 @@ class ChildHistoryPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  BarChartGroupData generateBarChartGroupData(int x, double y, Color color) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(toY: y, color: color),
+      ],
     );
   }
 }

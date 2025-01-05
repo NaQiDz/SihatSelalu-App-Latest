@@ -281,7 +281,7 @@ class BarChartSample extends StatelessWidget {
           borderData: FlBorderData(show: true),
           barGroups: [
             BarChartGroupData(x: 0, barRods: [
-              BarChartRodData(toY: 50, color: Colors.black)
+              BarChartRodData(toY: 10, color: Colors.black)
             ]),
             BarChartGroupData(x: 1, barRods: [
               BarChartRodData(toY: 20, color: Colors.black)
