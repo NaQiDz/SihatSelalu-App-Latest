@@ -5,7 +5,9 @@ import 'package:SihatSelaluApp/infochild.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'accountpage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -30,8 +32,9 @@ class ChildrenPage extends StatefulWidget {
 }
 
 class _ChildrenPageState extends State<ChildrenPage> {
-  String? username = SessionManager.username; // Hardcoded username
-  String? userid = SessionManager.userid; // Hardcoded username
+  String? username;
+  String? id;
+  String? email;
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
@@ -40,20 +43,41 @@ class _ChildrenPageState extends State<ChildrenPage> {
   @override
   void initState() {
     super.initState();
+    _loadSessionData();
     fetchUser();
     fetchChild();// Fetch data automatically on app start
   }
 
+  void _loadSessionData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final String? Email = prefs.getString('Email');
+      final String? ID = prefs.getString('ID');
+      final String? Username = prefs.getString('Username');
+
+      username = Username ?? "Guest";
+      email = Email ?? "example@mail.com";
+      id = ID;
+    });
+  }
+
   Future<void> fetchUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
     setState(() {
       isLoading = true;
       errorMessage = null;
       userData = null;
     });
+    final String? Username = prefs.getString('Username');
+    username = Username ?? "Guest";
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
         body: {'username': username}, // Send the hardcoded username
       );
 
@@ -85,6 +109,14 @@ class _ChildrenPageState extends State<ChildrenPage> {
   }
 
   Future<void> fetchChild() async {
+    String userid;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? ID = prefs.getString('ID');
+    userid = ID.toString();
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
     if (userid == null) {
       setState(() {
         errorMessage = 'User ID is not available.';
@@ -100,7 +132,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/try.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/try.php'), // Replace with your URL
         body: {'userid': userid},
       );
 
@@ -447,6 +479,10 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
 
   void _addChild(BuildContext context, String name, String fullname, String gender, String birthdate) async {
+    String userid;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? ID = prefs.getString('ID');
+    userid = ID.toString();
     final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/add_child.php');
 
     final response = await http.post(

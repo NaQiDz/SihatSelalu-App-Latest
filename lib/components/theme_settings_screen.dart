@@ -106,7 +106,7 @@ class ThemeSettingsScreen extends StatelessWidget {
 
   List<Widget> _themeSelector(BuildContext context) {
     final List<String> themeColors =
-    colorPalate.keys.toList().reversed.toList(growable: false);
+        colorPalate.keys.toList().reversed.toList(growable: false);
 
     final String currentTheme = appTheme.title;
     return List<Widget>.generate(themeColors.reversed.length, (index) {

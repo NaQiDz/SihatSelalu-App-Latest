@@ -22,15 +22,15 @@ class BMIDisplay extends StatelessWidget {
   final bool isResult;
   const BMIDisplay(
       {required this.title,
-        required this.widget,
-        this.isResult = false,
-        super.key});
+      required this.widget,
+      this.isResult = false,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
-      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
+      margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
         color: context.widgetBackground,
         borderRadius: BorderRadius.circular(30),

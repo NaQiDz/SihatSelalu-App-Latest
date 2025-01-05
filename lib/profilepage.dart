@@ -11,6 +11,7 @@ import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -32,7 +33,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String? username = SessionManager.username; // Hardcoded username
+  String? username;
+  String? email;
+  String? id;
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
@@ -40,7 +43,21 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    _loadSessionData();
     fetchUser(); // Fetch data automatically on app start
+  }
+
+  void _loadSessionData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final String? Email = prefs.getString('Email');
+      final String? ID = prefs.getString('ID');
+      final String? Username = prefs.getString('Username');
+
+      username = Username ?? "Guest";
+      email = Email ?? "example@mail.com";
+      id = ID;
+    });
   }
 
   File? _image;
@@ -88,11 +105,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoading = true;
       errorMessage = null;
       userData = null;
     });
+
+    final String? Email = prefs.getString('Email');
+    final String? ID = prefs.getString('ID');
+    final String? Username = prefs.getString('Username');
+
+    username = Username ?? "Guest";
+    email = Email ?? "example@mail.com";
+    id = ID;
 
     try {
       final response = await http.post(
@@ -330,30 +356,6 @@ class _ProfilePageState extends State<ProfilePage> {
             label: userData?['Gender'] ?? 'Gender not available',
             isEditable: isEditable,
           ),
-          SizedBox(height: screenHeight * 0.04),
-          if (isEditable)
-            ElevatedButton(
-              onPressed: () {
-                // Handle save action
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700,
-                padding: EdgeInsets.symmetric(
-                  vertical: screenHeight * 0.02,
-                  horizontal: screenWidth * 0.2,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-              ),
-              child: Text(
-                'Save',
-                style: TextStyle(
-                  fontSize: screenHeight * 0.015,
-                  color: Colors.white,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -363,14 +365,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return SizedBox(
       height: 45,
       child: TextField(
-        enabled: isEditable, // Now you can use isEditable directly
+        enabled: false, // Now you can use isEditable directly
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.white),
           filled: true,
-          fillColor: isEditable
-              ? Colors.white.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.2),
+          fillColor: Colors.grey.withOpacity(0.2),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),

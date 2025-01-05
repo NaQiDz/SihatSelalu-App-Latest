@@ -50,7 +50,7 @@ class _OutputWidgetState extends State<OutputWidget> {
               Text(bmiStatus.name.toUpperCase(),
                   style: context.resultName.copyWith(color: bmiStatus.color)),
               SizedBox(
-                height: 100,
+                height: 80,
                 child: AnimatedRadialGauge(
                   radius: 80,
                   duration: const Duration(seconds: 1),

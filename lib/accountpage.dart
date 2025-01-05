@@ -10,6 +10,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Accountpage extends StatelessWidget {
   const Accountpage({super.key});
 
@@ -31,25 +33,48 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  String? username = SessionManager.username;
-  String? email = SessionManager.email;
+  String? username;
+  String? id;
+  String? email;
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
+    _loadSessionData();
     fetchUser(); // Fetch data automatically on app start
+
+  }
+
+  void _loadSessionData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final String? Email = prefs.getString('Email');
+      final String? ID = prefs.getString('ID');
+      final String? Username = prefs.getString('Username');
+
+      username = Username ?? "Guest";
+      email = Email ?? "example@mail.com";
+      id = ID;
+    });
   }
 
   Future<void> fetchUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? Email = prefs.getString('Email');
+    final String? ID = prefs.getString('ID');
+    final String? Username = prefs.getString('Username');
+
+    username = Username ?? "Guest";
+    email = Email ?? "example@mail.com";
+    id = ID;
     setState(() {
       isLoading = true;
       errorMessage = null;
       userData = null;
     });
-
     try {
       final response = await http.post(
         Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
@@ -153,7 +178,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       SizedBox(height: screenHeight * 0.01),
                       Text(
-                        username!.toUpperCase(),
+                        (username?.toUpperCase() ?? 'Unknown User'),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -178,8 +203,6 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildAccount(BuildContext context) {
-    String? username = SessionManager.username;
-    String? email = SessionManager.email;
     return GestureDetector(
       onTap: () {
         // Navigate to ProfilePage when the entire box is tapped

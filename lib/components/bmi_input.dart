@@ -49,13 +49,13 @@ class InputWidget extends StatefulWidget {
 
   const InputWidget(
       {required this.valuesList,
-        required this.initValue,
-        required this.inputType,
-        this.isCustom = false,
-        this.isHorizontal = false,
-        this.interval = 1,
-        this.unit = '',
-        super.key});
+      required this.initValue,
+      required this.inputType,
+      this.isCustom = false,
+      this.isHorizontal = false,
+      this.interval = 1,
+      this.unit = '',
+      super.key});
 
   @override
   State<InputWidget> createState() => _InputWidgetState();
@@ -132,7 +132,7 @@ class _InputWidgetState extends State<InputWidget> {
           scrollPhysics: const BouncingScrollPhysics(),
           children: List.generate(
             widget.valuesList.length,
-                (index) => Stack(
+            (index) => Stack(
               alignment: Alignment.center,
               children: [
                 Icon(

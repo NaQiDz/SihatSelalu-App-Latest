@@ -66,39 +66,39 @@ class AppTheme {
   set setContrast(double contrast) => _appTheme._contrast = contrast;
 
   get themeData => ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      brightness: brightness,
-      contrastLevel: contrast,
-      seedColor: _colors["primary"],
-      surface: _colors["surface"], // widget title , widget Info
-      // onSurface: _colors["onSurface"], // app title , unselected Wheel text
-      primary: _colors["primary"], // Primary color app background
-      // onPrimary: _colors["onPrimary"], // scroll wheel selected item color
-      // primaryContainer: _colors["primaryContainer"],
-      // onPrimaryContainer: _colors["onPrimaryContainer"],
-      secondary: _colors["secondary"], // widget background
-      // onSecondary: _colors["onSecondary"],
-      error: _colors["error"],
-      onError: _colors["onError"],
-    ),
-    fontFamily: GoogleFonts.roboto().toString(),
-
-    /// TextTheme mapping to app
-    /// headlineLarge => OnSurface => appTitle
-    /// titleLarge => onPrimary => WidgetTitle
-    /// bodyLarge => onSurface => WidgetInfo
-
-    textTheme: GoogleFonts.texturinaTextTheme().copyWith(
-        headlineLarge: GoogleFonts.handlee(
-          fontWeight: FontWeight.bold,
-          color: _colors["onSurface"],
-          letterSpacing: 1.2,
+        colorScheme: ColorScheme.fromSeed(
+          brightness: brightness,
+          contrastLevel: contrast,
+          seedColor: _colors["primary"],
+          surface: _colors["surface"], // widget title , widget Info
+          // onSurface: _colors["onSurface"], // app title , unselected Wheel text
+          primary: _colors["primary"], // Primary color app background
+          // onPrimary: _colors["onPrimary"], // scroll wheel selected item color
+          // primaryContainer: _colors["primaryContainer"],
+          // onPrimaryContainer: _colors["onPrimaryContainer"],
+          secondary: _colors["secondary"], // widget background
+          // onSecondary: _colors["onSecondary"],
+          error: _colors["error"],
+          onError: _colors["onError"],
         ),
-        titleLarge: GoogleFonts.texturina(
-          color: _colors["surface"],
-          fontWeight: FontWeight.bold,
-        ),
-        bodyLarge: GoogleFonts.robotoCondensed(
-            color: _colors["surface"], fontWeight: FontWeight.w600)),
-  );
+        fontFamily: GoogleFonts.roboto().toString(),
+
+        /// TextTheme mapping to app
+        /// headlineLarge => OnSurface => appTitle
+        /// titleLarge => onPrimary => WidgetTitle
+        /// bodyLarge => onSurface => WidgetInfo
+
+        textTheme: GoogleFonts.texturinaTextTheme().copyWith(
+            headlineLarge: GoogleFonts.handlee(
+              fontWeight: FontWeight.bold,
+              color: _colors["onSurface"],
+              letterSpacing: 1.2,
+            ),
+            titleLarge: GoogleFonts.texturina(
+              color: _colors["surface"],
+              fontWeight: FontWeight.bold,
+            ),
+            bodyLarge: GoogleFonts.robotoCondensed(
+                color: _colors["surface"], fontWeight: FontWeight.w600)),
+      );
 }

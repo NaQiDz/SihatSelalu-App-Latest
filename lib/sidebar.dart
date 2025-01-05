@@ -1,21 +1,25 @@
 import 'package:SihatSelaluApp/accountpage.dart';
 import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
+import 'package:SihatSelaluApp/settings_screen.dart';
 import 'package:SihatSelaluApp/started.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
-
   @override
   _SideBarState createState() => _SideBarState();
 }
 
 class _SideBarState extends State<SideBar> {
   String? username;
+  String? id;
   String? email;
   String? icon;
   Map<String, dynamic>? userData;
@@ -30,22 +34,31 @@ class _SideBarState extends State<SideBar> {
     fetchUser();
   }
 
-  void _loadSessionData() {
+  void _loadSessionData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = SessionManager.username ?? "Guest";
-      email = SessionManager.email ?? "example@mail.com";
+      final String? Email = prefs.getString('Email');
+      final String? ID = prefs.getString('ID');
+      final String? Username = prefs.getString('Username');
+
+      username = Username ?? "Guest";
+      email = Email ?? "example@mail.com";
+      id = ID;
     });
   }
 
   Future<void> fetchUser() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
     setState(() {
       isLoading = true;
       errorMessage = null;
       userData = null;
     });
     try {
+      serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'),
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'),
         body: {'username': username},
       );
 
@@ -67,6 +80,11 @@ class _SideBarState extends State<SideBar> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Replace the hardcoded IP with the dynamically loaded serverIp
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
+
     return Drawer(
       child: Container(
         padding: EdgeInsets.all(screenHeight * 0.01),
@@ -83,15 +101,19 @@ class _SideBarState extends State<SideBar> {
                 children: [
                   SizedBox(height: screenHeight * 0.05),
                   if (userData?['Icon'] == null)
-                  CircleAvatar(
-                    radius: screenHeight * 0.04,
-                    backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'),
-                  ),
+                    CircleAvatar(
+                      radius: screenHeight * 0.04,
+                      backgroundImage: NetworkImage(
+                        'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
+                      ),
+                    ),
                   if (userData?['Icon'] != null)
-                  CircleAvatar(
-                    radius: screenHeight * 0.04,
-                    backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']),
-                  ),
+                    CircleAvatar(
+                      radius: screenHeight * 0.04,
+                      backgroundImage: NetworkImage(
+                        'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon']}',
+                      ),
+                    ),
                   SizedBox(height: screenHeight * 0.02),
                   Text(
                     'Welcome, $username!',
@@ -130,6 +152,7 @@ class _SideBarState extends State<SideBar> {
               icon: FontAwesomeIcons.cog,
               title: 'Settings',
               onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
                 // Navigate to Settings
               },
             ),
@@ -138,7 +161,11 @@ class _SideBarState extends State<SideBar> {
             _buildSidebarItem(
               icon: FontAwesomeIcons.signOutAlt,
               title: 'Logout',
-              onTap: () {
+              onTap: () async{
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove('Email');
+                prefs.remove('ID');
+                prefs.remove('Username');
                 SessionManager.clearSession();
                 showPopup(context, "Logout", "You have been logged out", loginSession: false);
                 Navigator.pushAndRemoveUntil(
@@ -153,6 +180,7 @@ class _SideBarState extends State<SideBar> {
       ),
     );
   }
+
 
   Widget _buildSidebarItem({
     required IconData icon,
