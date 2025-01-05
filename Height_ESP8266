@@ -1,0 +1,86 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+// Wi-Fi Credentials
+const char* ssid = "AZUAN_2.4GHz";       // Name wifi
+const char* password = "Aqil7779";       // Password wifi
+
+const int trigPin = 12;  // Trig Pin of the sensor
+const int echoPin = 14;  // Echo Pin of the sensor
+
+#define SOUND_VELOCITY 0.034
+
+const float floorDistance = 180.0;  // Distance from the floor
+
+long duration;
+float distanceToObject;
+float objectHeightCm;
+
+ESP8266WebServer server(80); // port 80 to connect web server
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  // Connect to Wi-Fi
+  Serial.println("Connecting to Wi-Fi...");
+  WiFi.begin(ssid, password);
+  
+  int attempts = 0; // Track connection attempts
+  while (WiFi.status() != WL_CONNECTED && attempts < 10) { // Retry 10 times
+    delay(1000);
+    Serial.print(".");
+    attempts++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWi-Fi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\nWi-Fi Not Connected. Please check your credentials.");
+    return; 
+  }
+
+  // Define route
+  server.on("/height", HTTP_GET, []() {
+    measureHeight();
+    String jsonData = String("{\"height\":") + objectHeightCm + "}"; // Format response as JSON
+    server.sendHeader("Access-Control-Allow-Origin", "*"); 
+    server.send(200, "application/json", jsonData);
+  });
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+
+void loop() {
+  server.handleClient();
+}
+
+void measureHeight() {
+  long totalDuration = 0;
+  int samples = 5; // Number of samples for averaging
+
+  for (int i = 0; i < samples; i++) {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    long singleDuration = pulseIn(echoPin, HIGH);
+    totalDuration += singleDuration;
+    delay(50); // Small delay between samples
+  }
+
+  duration = totalDuration / samples; // Average duration
+  distanceToObject = duration * SOUND_VELOCITY / 2;
+
+  if (distanceToObject > 0 && distanceToObject < floorDistance) {
+    objectHeightCm = floorDistance - distanceToObject;
+  } else {
+    objectHeightCm = 0; // Invalid reading
+  }
+}
