@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'verify_code.dart';
 import 'login.dart';
@@ -28,6 +29,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool isLoading = false;
 
   void sendVerificationEmail() async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     final String email = emailController.text;
 
     if (email.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
@@ -39,7 +43,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://10.131.74.170/SihatSelaluAppDatabase/forgot_password.php');
+    final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/forgot_password.php');
     try {
       final response = await http.post(url, body: {'email': email}).timeout(Duration(seconds: 10));
 

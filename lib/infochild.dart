@@ -3,6 +3,7 @@ import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -28,6 +29,9 @@ class _InfoChildPageState extends State<InfoChildPage> {
   }
 
   Future<void> fetchUserData() async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -36,7 +40,7 @@ class _InfoChildPageState extends State<InfoChildPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/managechild.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/managechild.php'), // Replace with your URL
         body: {'childid': widget.childId.toString()}, // Send the childId
 
       );

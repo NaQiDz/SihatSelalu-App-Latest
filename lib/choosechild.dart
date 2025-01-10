@@ -159,7 +159,7 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 0),
                       _buildChildList(), // Extracted list logic
                     ],
                   ),
@@ -213,64 +213,85 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
     }
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.5, // Adjust height dynamically
-      child: ListView.builder(
-        itemCount: childData!.length,
-        itemBuilder: (context, index) {
-          var child = childData![index];
-          int age = calculateAge(child['child_dateofbirth']); // Calculate age
+      height: MediaQuery.of(context).size.height * 0.345, // Keep box height constant
+      child: ListWheelScrollView.useDelegate(
+        itemExtent: MediaQuery.of(context).size.height * 0.08, // Item height consistent
+        diameterRatio: 1.6, // Slightly higher curvature for smoother transition
+        useMagnifier: true, // Magnification effect when focused
+        magnification: 1.0, // Zoom effect when item is focused
+        physics: const FixedExtentScrollPhysics(), // Ensures smooth transition with one item focus
+        childDelegate: ListWheelChildBuilderDelegate(
+          builder: (context, index) {
+            var child = childData![index];
+            int age = calculateAge(child['child_dateofbirth']); // Calculate age
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => IOTPage()), // Replace with your actual ProfilePage
-              );
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(
-                vertical: MediaQuery.of(context).size.height * 0.005, // Adjust vertical margin
-                horizontal: MediaQuery.of(context).size.width * 0.03, // Adjust horizontal margin
-              ),
-              padding: EdgeInsets.symmetric(
-                vertical: MediaQuery.of(context).size.height * 0.00001, // Adjust vertical padding
-                horizontal: MediaQuery.of(context).size.width * 0.04, // Adjust horizontal padding
-              ),
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: Text(
-                  '${index + 1}.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IOTPage(
+                      childId: child['child_id'],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.height * 0.003,
+                  horizontal: MediaQuery.of(context).size.width * 0.03,
+                ).copyWith(bottom: MediaQuery.of(context).size.height * 0.001), // Bottom margin
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.height * 0.00001,
+                  horizontal: MediaQuery.of(context).size.width * 0.04,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20), // Rounded corners
+                  border: Border.all(
+                    color: Colors.transparent, // Transparent border to follow radius
+                    width: 2.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2), // Shadow effect for smoothness
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 2), // Subtle shadow
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  leading: Text(
+                    '${index + 1}.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                    ),
+                  ),
+                  title: Text(
+                    child['child_fullname'] ?? 'No Name',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                    ),
+                  ),
+                  trailing: Text(
+                    'Age: $age',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                    ),
                   ),
                 ),
-                title: Text(
-                  child['child_fullname'] ?? 'No Name',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
-                  ),
-                ),
-                trailing: Text(
-                  'Age: $age',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: MediaQuery.of(context).size.width * 0.035, // Dynamic font size
-                  ),
-                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+          childCount: childData!.length,
+        ),
       ),
     );
   }
-
-
 
 
   Widget _buildRecentlyUsedSection(BuildContext context) {

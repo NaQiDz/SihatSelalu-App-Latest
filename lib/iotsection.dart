@@ -1,77 +1,182 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:SihatSelaluApp/choosechild.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class IOTPage extends StatelessWidget {
-  const IOTPage({super.key});
-
+class IOTPage extends StatefulWidget {
+  final int childId;
+  const IOTPage({super.key, required this.childId});
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: IOTPageToUse(),
-    );
-  }
+  _IOTPageToUse createState() => _IOTPageToUse();
 }
 
-class IOTPageToUse extends StatefulWidget {
-  const IOTPageToUse({super.key});
-
-  @override
-  State<IOTPageToUse> createState() => _IOTPageToUse();
-}
-
-class _IOTPageToUse extends State<IOTPageToUse> {
+class _IOTPageToUse extends State<IOTPage> {
   String _weight = "Loading...";
+  String _height = "Loading...";
   double weightAsDouble = 0.00;
+  double heightInMeters = 0.00;
   Timer? _timer;
+  bool _startBmiCountdown = false;
+  bool isLoading = false;
+  String? errorMessage;
+  Map<String, dynamic>? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData(); // Fetch data automatically on app start
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      fetchWeight();
+      fetchHeight();
+    });
+  }
 
   Future<void> fetchWeight() async {
-    final url = Uri.parse('http://172.20.10.2/weight'); // Replace with your ESP8266's IP address
+    final url = Uri.parse('http://172.20.10.4/weight');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
         setState(() {
-          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}"; // Format to 2 decimal places
-          String numericPart = _weight.split(' ')[0];
-          weightAsDouble = double.parse(numericPart);
+          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}";
+          weightAsDouble = weight;
         });
+
+        if (weight > 10 && !_startBmiCountdown) {
+          _startBmiCountdown = true;
+          _startCountdownToBmiDialog();
+        }
       }
     } catch (e) {
       setState(() {
-        _weight = "Error: $e";
+        _weight = "Loading...";
       });
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Start a timer to refresh the weight every second
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      fetchWeight();
+  Future<void> fetchHeight() async {
+    final url = Uri.parse('http://172.20.10.3/height'); // Replace with your ESP8266 IP
+    try {
+      final response = await http.get(url); // Send GET request using http package
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _height = "${data['height']} cm";
+          double heightInCm = double.tryParse(data['height'].toString()) ?? 0.0;
+          heightInMeters = heightInCm / 100.0;
+        });
+      } else {
+        setState(() {
+          _height = "Error: ${response.statusCode}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _height = "Loading...";
+      });
+    }
+  }
+
+
+
+  Future<void> fetchUserData() async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      userData = null;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/managechild.php'), // Replace with your URL
+        body: {'childid': widget.childId.toString()}, // Send the childId
+
+      );
+      print('child id : ${widget.childId}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic> && data['error'] == null) {
+          setState(() {
+            userData = data; // Assuming your data structure contains a 'data' key
+            isLoading = false;
+            print('Child info: $userData');
+          });
+        } else {
+          setState(() {
+            errorMessage = data['error'] ?? data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
+
+  void _startCountdownToBmiDialog() {
+    Future.delayed(Duration(seconds: 5), () {
+      _showBmiDialog(context, calculateBmi(weightAsDouble, heightInMeters));
+      _timer?.cancel();
     });
   }
 
   @override
   void dispose() {
-    // Cancel the timer when the widget is disposed
     _timer?.cancel();
     super.dispose();
+  }
+
+  double calculateBmi(double weight, double height) {
+    return weight / (height * height);
+  }
+
+  int calculateAge(String birthDateString) {
+    // Ensure the birthDateString is not null or empty before proceeding
+    if (birthDateString.isEmpty) return 0; // Handle the case when the birth date is not available.
+
+    // Parse the input string into a DateTime object
+    DateTime birthDate = DateTime.parse(birthDateString);
+    DateTime today = DateTime.now();
+
+    // Calculate the difference in years
+    int age = today.year - birthDate.year;
+
+    // Check if the birthday has not occurred yet this year
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // Ensure userData is not null before calculating age
+    int age = userData != null ? calculateAge(userData!['child_dateofbirth']) : 0; // Default to 0 if userData is null
 
     return Scaffold(
       backgroundColor: Colors.blue.shade900,
@@ -114,90 +219,98 @@ class _IOTPageToUse extends State<IOTPageToUse> {
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 Center(
-                  child: Center(
-                    child: Container(
-                      height: screenHeight * 0.2, // Increased height to accommodate text fields
-                      width: screenWidth * 0.9, // Adjust width as needed
-                      padding: const EdgeInsets.all(10), // Padding around the gauge
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6), // Slightly less transparent background
-                        borderRadius: BorderRadius.circular(15), // Rounded corners
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
+                  child: Container(
+                    height: screenHeight * 0.2,
+                    width: screenWidth * 0.9,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.transparent,
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(screenWidth * 0.00),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute space evenly
-                        crossAxisAlignment: CrossAxisAlignment.start, // Align text fields to the start
-                        children: [
-                          // Name Text Field
-                          TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: screenHeight * 0.05,
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: userData?['child_fullname'] ?? 'Unknown Name',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    filled: false,
+                                    enabled: false,
+                                    fillColor: Colors.transparent,
+                                    prefixIcon: Icon(Icons.person),
+                                  ),
+                                ),
                               ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.2),
-                              prefixIcon: Icon(Icons.person),
-                            ),
-                          ),
-                          // Gender Text Field
-                          TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Gender',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              SizedBox(height: screenHeight * 0.005),
+                              SizedBox(
+                                height: screenHeight * 0.05,
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: userData?['child_gender'] ?? 'Unknown Name',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    filled: false,
+                                    enabled: false,
+                                    fillColor: Colors.transparent,
+                                    prefixIcon: Icon(Icons.wc),
+                                  ),
+                                ),
                               ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.2),
-                              prefixIcon: Icon(Icons.wc),
-                            ),
-                          ),
-                          // Age Text Field
-                          TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Age',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              SizedBox(height: screenHeight * 0.005),
+                              SizedBox(
+                                height: screenHeight * 0.05,
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    labelText: '$age Years',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    filled: false,
+                                    enabled: false,
+                                    fillColor: Colors.transparent,
+                                    prefixIcon: Icon(Icons.calendar_today),
+                                  ),
+                                ),
                               ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.2),
-                              prefixIcon: Icon(Icons.calendar_today),
-                            ),
-                            keyboardType: TextInputType.number, // Numeric input for age
+                            ],
                           ),
-                        ],
-                      ),
+                        )
+                      ],
                     ),
                   ),
                 ),
-
                 SizedBox(height: screenHeight * 0.02),
-                // Row for Ruler and other content
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Ensures proper vertical alignment
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Ruler Section (Left Side)
                     SizedBox(
-                      height: screenHeight * 0.26, // Equal height for both gauges
-                      width: screenWidth * 0.45, // Adjust width as needed
+                      height: screenHeight * 0.26,
+                      width: screenWidth * 0.45,
                       child: _buildRadialGaugeWeight(),
                     ),
-                    SizedBox(width: screenWidth * 0.05), // Space between sections
-                    // Placeholder for other content (Right Side)
+                    SizedBox(width: screenWidth * 0.05),
                     Expanded(
                       flex: 4,
                       child: Column(
                         children: [
-                          // Radial Gauge Section
                           SizedBox(
-                            height: screenHeight * 0.26, // Equal height for both gauges
-                            width: screenWidth * 0.45, // Adjust width as needed
+                            height: screenHeight * 0.26,
+                            width: screenWidth * 0.45,
                             child: _buildRadialGaugeHeight(),
                           ),
                         ],
@@ -206,42 +319,36 @@ class _IOTPageToUse extends State<IOTPageToUse> {
                   ],
                 ),
                 SizedBox(height: screenHeight * 0.02),
-                // Row for Ruler and other content
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Ensures proper vertical alignment
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Ruler Section (Left Side)
                     Container(
-                      height: screenHeight * 0.10, // Set height for the container
-                      width: screenWidth * 0.45, // Adjust width as needed
-                      padding: const EdgeInsets.all(15), // Padding around the content inside the container
+                      height: screenHeight * 0.10,
+                      width: screenWidth * 0.45,
+                      padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6), // Background color for the container
-                        borderRadius: BorderRadius.circular(15), // Rounded corners
+                        color: Colors.white.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center, // Vertically center the icon and text
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Icon
                           Icon(
                             FontAwesomeIcons.weight,
                             color: Colors.red,
-                            size: screenWidth * 0.08, // Adjust icon size based on screen width
+                            size: screenWidth * 0.08,
                           ),
-                          SizedBox(width: screenWidth * 0.02), // Space between icon and text
-                          // Weight Value Text
+                          SizedBox(width: screenWidth * 0.02),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Title Text
-                              SizedBox(height: screenWidth * 0.04), // Space between title and value
-                              // Weight Value Text
+                              SizedBox(height: screenWidth * 0.04),
                               Text(
-                                '75 kg', // Example value for weight
+                                _weight,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: screenWidth * 0.05, // Adjust font size based on screen width
-                                  fontWeight: FontWeight.bold, // Make the text bold
+                                  fontSize: screenWidth * 0.05,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -249,43 +356,38 @@ class _IOTPageToUse extends State<IOTPageToUse> {
                         ],
                       ),
                     ),
-                    SizedBox(width: screenWidth * 0.05), // Space between sections
-                    // Placeholder for other content (Right Side)
+                    SizedBox(width: screenWidth * 0.05),
                     Expanded(
                       flex: 4,
                       child: Column(
                         children: [
                           Container(
-                            height: screenHeight * 0.10, // Set height for the container
-                            width: screenWidth * 0.45, // Adjust width as needed
-                            padding: const EdgeInsets.all(15), // Padding around the content inside the container
+                            height: screenHeight * 0.10,
+                            width: screenWidth * 0.45,
+                            padding: const EdgeInsets.all(15),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.6), // Background color for the container
-                              borderRadius: BorderRadius.circular(15), // Rounded corners
+                              color: Colors.white.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(15),
                             ),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center, // Vertically center the icon and text
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Icon
                                 Icon(
                                   FontAwesomeIcons.ruler,
                                   color: Colors.blue,
-                                  size: screenWidth * 0.08, // Adjust icon size based on screen width
+                                  size: screenWidth * 0.08,
                                 ),
-                                SizedBox(width: screenWidth * 0.02), // Space between icon and text
-                                // Weight Value Text
+                                SizedBox(width: screenWidth * 0.02),
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Title Text
-                                    SizedBox(height: screenWidth * 0.04), // Space between title and value
-                                    // Weight Value Text
+                                    SizedBox(height: screenWidth * 0.04),
                                     Text(
-                                      '75 kg', // Example value for weight
+                                      _height,
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: screenWidth * 0.05, // Adjust font size based on screen width
-                                        fontWeight: FontWeight.bold, // Make the text bold
+                                        fontSize: screenWidth * 0.05,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
@@ -311,9 +413,8 @@ class _IOTPageToUse extends State<IOTPageToUse> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6), // Background color for the container
-        // Background color for the gauge container
-        borderRadius: BorderRadius.circular(15), // Rounded corners
+        color: Colors.white.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: SfRadialGauge(
         title: GaugeTitle(
@@ -327,15 +428,14 @@ class _IOTPageToUse extends State<IOTPageToUse> {
             minimum: 0,
             maximum: 75,
             pointers: <GaugePointer>[
-              NeedlePointer(value: 0, enableAnimation: true),
+              NeedlePointer(value: weightAsDouble, enableAnimation: true),
             ],
             ranges: <GaugeRange>[
               GaugeRange(startValue: 0, endValue: 25, color: Colors.green),
               GaugeRange(startValue: 25, endValue: 50, color: Colors.orange),
               GaugeRange(startValue: 50, endValue: 75, color: Colors.red),
             ],
-            annotations: <GaugeAnnotation>[
-            ],
+            annotations: <GaugeAnnotation>[],
           ),
         ],
       ),
@@ -346,9 +446,8 @@ class _IOTPageToUse extends State<IOTPageToUse> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6), // Background color for the container
-        // Background color for the gauge container
-        borderRadius: BorderRadius.circular(15), // Rounded corners
+        color: Colors.white.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: SfRadialGauge(
         title: GaugeTitle(
@@ -362,59 +461,109 @@ class _IOTPageToUse extends State<IOTPageToUse> {
             minimum: 0,
             maximum: 200,
             pointers: <GaugePointer>[
-              NeedlePointer(value: weightAsDouble, enableAnimation: true),
+              NeedlePointer(value: heightInMeters * 100, enableAnimation: true),
             ],
             ranges: <GaugeRange>[
               GaugeRange(startValue: 0, endValue: 50, color: Colors.yellow),
-              GaugeRange(startValue: 50, endValue: 100, color: Colors.blue),
-              GaugeRange(startValue: 100, endValue: 150, color: Colors.green),
-              GaugeRange(startValue: 150, endValue: 200, color: Colors.green),
+              GaugeRange(startValue: 50, endValue: 100, color: Colors.orange),
+              GaugeRange(startValue: 100, endValue: 200, color: Colors.red),
             ],
-            annotations: <GaugeAnnotation>[
-            ],
+            annotations: <GaugeAnnotation>[],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1.0, horizontal: 12.0), // Add padding here
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Label Text
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: screenWidth * 0.009), // Space between label and value
+  void _showBmiDialog(BuildContext context, double bmiValue) {
+    String weightStatus;
 
-          // Value Container
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(screenWidth * 0.02),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
+    if (bmiValue < 18.5) {
+      weightStatus = 'Underweight';
+    } else if (bmiValue >= 18.5 && bmiValue < 24.9) {
+      weightStatus = 'Normal weight';
+    } else if (bmiValue >= 25 && bmiValue < 29.9) {
+      weightStatus = 'Overweight';
+    } else {
+      weightStatus = 'Obese';
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.all(25),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          backgroundColor: Colors.black.withOpacity(0.6),
+          title: Center(
             child: Text(
-              value,
+              'BMI Result',
               style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
-        ],
-      ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Your BMI is:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                bmiValue.toStringAsFixed(2),
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.greenAccent,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Weight Status:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                weightStatus,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChildrenChoosePage()),
+                );
+              },
+              child: Text(
+                'Go to Child Page',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+
+        );
+      },
     );
   }
-
 }
+

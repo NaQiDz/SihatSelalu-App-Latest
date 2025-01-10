@@ -1,12 +1,15 @@
 import 'package:SihatSelaluApp/about_system.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
+import 'package:SihatSelaluApp/child_history.dart';
 import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/home.dart';
+import 'package:SihatSelaluApp/parent_history.dart';
 import 'package:SihatSelaluApp/profilepage.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -63,6 +66,8 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> fetchUser() async {
+    await dotenv.load(fileName:'.env');
+    String? serverIp;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? Email = prefs.getString('Email');
     final String? ID = prefs.getString('ID');
@@ -77,8 +82,9 @@ class _AccountPageState extends State<AccountPage> {
       userData = null;
     });
     try {
+      serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
         body: {'username': username}, // Send the hardcoded username
       );
 
@@ -113,6 +119,10 @@ class _AccountPageState extends State<AccountPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
 
     return Scaffold(
       backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
@@ -170,12 +180,12 @@ class _AccountPageState extends State<AccountPage> {
                       if (userData?['Icon'] == null)
                         CircleAvatar(
                           radius: screenHeight * 0.06,
-                          backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                          backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
                         ),
                       if (userData?['Icon'] != null)
                         CircleAvatar(
                           radius: screenHeight * 0.06,
-                          backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                          backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
                         ),
                       SizedBox(height: screenHeight * 0.01),
                       Text(
@@ -294,7 +304,7 @@ class _AccountPageState extends State<AccountPage> {
         // Navigate to ProfilePage when the entire box is tapped
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProfilePage()), // Replace with your actual ProfilePage
+          MaterialPageRoute(builder: (context) => ParentHistoryPage()), // Replace with your actual ProfilePage
         );
       },
       child: Container(

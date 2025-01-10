@@ -184,6 +184,10 @@ class _ChildrenPageState extends State<ChildrenPage> {
         .size
         .width;
 
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
+
     return Scaffold(
       backgroundColor: Colors.blue.shade900,
       // Make Scaffold background transparent
@@ -243,12 +247,12 @@ class _ChildrenPageState extends State<ChildrenPage> {
                     if (userData?['Icon'] == null)
                       CircleAvatar(
                         radius: screenHeight * 0.06,
-                        backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                        backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
                       ),
                     if (userData?['Icon'] != null)
                       CircleAvatar(
                         radius: screenHeight * 0.06,
-                        backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                        backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
                       ),
                     SizedBox(width: screenWidth * 0.04),
                     Column(
@@ -262,7 +266,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                           ),
                         ),
                         Text(
-                          'Age      : ${userData?['Age']?.toString() ?? 'loading..'} Years',
+                          'Age       : ${userData?['Age']?.toString() ?? 'loading..'} Years',
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
@@ -270,7 +274,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          'Role     : Parent',
+                          'Role      : Parent',
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -424,11 +428,14 @@ class _ChildrenPageState extends State<ChildrenPage> {
   }
 
   void _deleteChild(BuildContext context, String childId) async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     // Confirm deletion with a dialog
     bool confirm = await _showConfirmationDialog(context) ?? false;
 
     if (confirm) {
-      final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/delete_child.php');
+      final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/delete_child.php');
 
       final response = await http.post(
         url,
@@ -479,11 +486,14 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
 
   void _addChild(BuildContext context, String name, String fullname, String gender, String birthdate) async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     String userid;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? ID = prefs.getString('ID');
     userid = ID.toString();
-    final url = Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/add_child.php');
+    final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/add_child.php');
 
     final response = await http.post(
       url,
@@ -496,6 +506,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
       },
     );
     print('parentid $userid');
+    print('Birthdate $birthdate');
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 

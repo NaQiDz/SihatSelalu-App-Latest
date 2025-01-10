@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:SihatSelaluApp/accountpage.dart';
@@ -70,6 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _uploadImage() async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_image == null) return;
     final String? Email = prefs.getString('Email');
@@ -78,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     String? username = Username;
 
-    final uri = Uri.parse("http://172.20.10.3/SihatSelaluAppDatabase/upload.php");
+    final uri = Uri.parse("http://$serverIp/SihatSelaluAppDatabase/upload.php");
     var request = http.MultipartRequest('POST', uri)
       ..fields['username'] = username!  // The username to identify which user to update
       ..files.add(await http.MultipartFile.fromPath(
@@ -96,7 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
         print("Image uploaded and icon updated successfully!");
         setState(() {
           // Update the image URL if the upload is successful
-          _uploadedImageUrl = "http://172.20.10.3/SihatSelaluAppDatabase/" + responseJson['url'];
+          _uploadedImageUrl = "http://$serverIp/SihatSelaluAppDatabase/" + responseJson['url'];
         });
       } else {
         print("Failed to update icon: ${responseJson['message']}");
@@ -107,6 +111,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchUser() async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoading = true;
@@ -119,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://172.20.10.3/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
         body: {'username': username}, // Send the hardcoded username
       );
 
@@ -159,6 +166,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
 
     return Scaffold(
       backgroundColor: Colors.blue.shade900,
@@ -219,13 +229,13 @@ class _ProfilePageState extends State<ProfilePage> {
                             if (userData?['Icon'] == null)
                             CircleAvatar(
                               radius: screenHeight * 0.06,
-                              backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                              backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
                               backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
                             ),
                             if (userData?['Icon'] != null)
                             CircleAvatar(
                               radius: screenHeight * 0.06,
-                              backgroundImage: NetworkImage('http://172.20.10.3/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                              backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
                               backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
                             ),
                             if(_uploadedImageUrl.isNotEmpty)
@@ -339,17 +349,17 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           SizedBox(height: 10),
           _buildTextField(
-            label: userData?['PhoneNum']?.toString() ?? 'Phone number not available',
+            label: 'Phone Number : ' + (userData?['PhoneNum']?.toString() ?? 'Phone number not available'),
             isEditable: isEditable,
           ),
           SizedBox(height: 10),
           _buildTextField(
-            label: userData?['Age']?.toString() ?? 'Age not available',
+            label: 'Age                    : ' + (userData?['Age']?.toString() ?? 'Age not available'),
             isEditable: isEditable,
           ),
           SizedBox(height: 10),
           _buildTextField(
-            label: userData?['Gender'] ?? 'Gender not available',
+            label: 'Gender              : ' + (userData?['Gender'] ?? 'Gender not available'),
             isEditable: isEditable,
           ),
         ],
