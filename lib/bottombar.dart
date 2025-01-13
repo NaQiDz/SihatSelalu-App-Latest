@@ -1,4 +1,6 @@
 import 'package:SihatSelaluApp/bmi_bar.dart';
+import 'package:SihatSelaluApp/caloriechild.dart';
+import 'package:SihatSelaluApp/childmealplan.dart';
 import 'package:SihatSelaluApp/choosechild.dart';
 import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +27,9 @@ class BottomBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItemBottom(Icons.home, 'Home', context, HomePage()),
-              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, HomePage()),
+              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, CalorieChildPage()),
               SizedBox(width: 20), // Space for the floating QR icon
-              _buildNavItemBottom(Icons.tips_and_updates, 'Plan', context, HomePage()),
+              _buildNavItemBottom(Icons.tips_and_updates, 'Plan', context, MealPlan()),
               _buildNavItemBottom(
                 Icons.calculate,
                 'Calculate BMI',

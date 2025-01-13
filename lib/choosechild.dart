@@ -36,11 +36,13 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
   bool isLoading = true;
   String? errorMessage;
   List<dynamic>? childData;
+  List<dynamic>? bmidata;
 
   @override
   void initState() {
     super.initState();
     fetchChild();// Fetch data automatically on app start
+    fetchBmiusage();
   }
 
   Future<void> fetchChild() async {
@@ -78,13 +80,6 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
             isLoading = false;
           });
           print('Child Data : $childData');
-          /*ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data loaded successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3), // Adjust duration as needed
-            ),
-          );*/
         }
         else {
           setState(() {
@@ -105,6 +100,63 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
       });
     }
   }
+
+  Future<void> fetchBmiusage() async {
+    String userid;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? ID = prefs.getString('ID');
+    userid = ID.toString();
+    await dotenv.load(fileName: '.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+
+    if (userid == null) {
+      setState(() {
+        errorMessage = 'User ID is not available.';
+        isLoading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      bmidata = null;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/checkbmisusage.php'),
+        body: {'userid': userid},
+      );
+      print('Response: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+            bmidata = data['BmiData'];
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            errorMessage = data['message'] ?? 'An error occurred';
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +345,6 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
     );
   }
 
-
   Widget _buildRecentlyUsedSection(BuildContext context) {
     return Positioned(
       bottom: 0,
@@ -331,34 +382,45 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
-              _buildRecentlyUsedItem('1. Child name', '34 Kg', '123 Cm'),
-              const SizedBox(height: 10),
-              _buildRecentlyUsedItem('2. Child name', '34 Kg', '123 Cm'),
-              const SizedBox(height: 10),
-              _buildRecentlyUsedItem('3. Child name', '34 Kg', '123 Cm'),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.22, // Constrain height
+                child: ListView.builder(
+                  itemCount: bmidata?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    var bmi = bmidata![index];
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            bmi['child_username']?.toString() ?? 'No Name',
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                          Text(
+                            ((bmi['child_height']*100) != null ? (bmi['child_height']*100).toString() : 'N/A') + ' cm',
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                          Text(
+                            (bmi['child_weight'] != null ? bmi['child_weight'].toString() : 'N/A') + ' kg',
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    );
+
+                  },
+                ),
+              )
+
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildRecentlyUsedItem(String name, String weight, String height) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(name, style: const TextStyle(color: Colors.black, fontSize: 14)),
-          Text(weight, style: const TextStyle(color: Colors.black, fontSize: 14)),
-          Text(height, style: const TextStyle(color: Colors.black, fontSize: 14)),
-        ],
       ),
     );
   }
@@ -380,3 +442,4 @@ int calculateAge(String birthDateString) {
 
   return age;
 }
+

@@ -38,10 +38,10 @@ class HomePageToUse extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900,
       drawer: const SideBar(),
       body: Stack(
         children: [
+          // The content of the page
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -94,11 +94,19 @@ class HomePageToUse extends StatelessWidget {
               ),
             ),
           ),
+
+          // Positioned BottomBar at the bottom of the screen
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: const BottomBar(), // Move BottomBar outside of Scaffold body
+          ),
         ],
       ),
-      bottomNavigationBar: const BottomBar(), // Bottom bar
     );
   }
+
 
   Widget _buildCircularChart(double screenHeight) {
     return Container(

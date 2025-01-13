@@ -144,14 +144,6 @@ class _ChildrenPageState extends State<ChildrenPage> {
             isLoading = false;
           });
           print('Child Data : $childData');
-          // Show success message
-          /*ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data loaded successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3), // Adjust duration as needed
-            ),
-          );*/
         }
         else {
           setState(() {
@@ -175,46 +167,40 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
         ? dotenv.env['DB_HOST_EMU']!
         : dotenv.env['DB_HOST_IP']!;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900,
-      // Make Scaffold background transparent
       drawer: const SideBar(),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Header(),
-                SizedBox(height: screenHeight * 0.02),
-                CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  child: Builder(
-                    builder: (context) =>
-                        IconButton(
+      body: Stack(
+        children: [
+          // Main content wrapped in SingleChildScrollView
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black, Colors.blue.shade900],
+              ),
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(screenWidth * 0.02),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Header(),
+                    SizedBox(height: screenHeight * 0.02),
+                    CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      child: Builder(
+                        builder: (context) => IconButton(
                           icon: Icon(
                             FontAwesomeIcons.arrowLeft,
                             color: Colors.white,
@@ -223,209 +209,222 @@ class _ChildrenPageState extends State<ChildrenPage> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => AccountPage()),
+                              MaterialPageRoute(builder: (context) => AccountPage()),
                             );
                           },
                         ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.00),
-                Center(
-                  child: Text(
-                    'Manage Children',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: screenHeight * 0.03,
-                      fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.04),
-                Row(
-                  children: [
-                    if (userData?['Icon'] == null)
-                      CircleAvatar(
-                        radius: screenHeight * 0.06,
-                        backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                    SizedBox(height: screenHeight * 0.00),
+                    Center(
+                      child: Text(
+                        'Manage Children',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    if (userData?['Icon'] != null)
-                      CircleAvatar(
-                        radius: screenHeight * 0.06,
-                        backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
-                      ),
-                    SizedBox(width: screenWidth * 0.04),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    SizedBox(height: screenHeight * 0.04),
+                    Row(
                       children: [
+                        if (userData?['Icon'] == null)
+                          CircleAvatar(
+                            radius: screenHeight * 0.06,
+                            backgroundImage: NetworkImage(
+                                'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                          ),
+                        if (userData?['Icon'] != null)
+                          CircleAvatar(
+                            radius: screenHeight * 0.06,
+                            backgroundImage: NetworkImage(
+                                'http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                          ),
+                        SizedBox(width: screenWidth * 0.04),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              (userData?['Username']?.toString() ?? 'loading..'),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Age       : ${userData?['Age']?.toString() ?? 'loading..'} Years',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              'Gender : ${userData?['Gender']?.toString() ?? 'loading..'}',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              'Role      : Parent',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+                    Divider(color: Colors.grey),
+                    SizedBox(height: screenHeight * 0.05),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.blue,
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.add, color: Colors.white),
+                            onPressed: () {
+                              _showAddChildDialog(context);
+                            },
+                            iconSize: 30,
+                          ),
+                        ),
+                        SizedBox(width: 8),
                         Text(
-                          (userData?['Username']?.toString() ?? 'loading..'),
+                          'Add Child',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          'Age       : ${userData?['Age']?.toString() ?? 'loading..'} Years',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          'Gender : ${userData?['Gender']?.toString() ?? 'loading..'}',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          'Role      : Parent',
-                          style: TextStyle(color: Colors.white),
-                        ),
                       ],
                     ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.03),
-                Divider(color: Colors.grey),
-                SizedBox(height: screenHeight * 0.03),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // Center them horizontally
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(0),
-                      // Adjust padding to control circle size
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors
-                            .blue, // Change the background color of the circle
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.add, color: Colors.white),
-                        onPressed: () {
-                          _showAddChildDialog(context);
-                        },
-                        iconSize: 30, // Adjust icon size as needed
-                      ),
-                    ),
-                    SizedBox(width: 8), // Spacing between the icon and the text
-                    Text(
-                      'Add Child',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const SizedBox(height: 20),
-
-                    // Check loading state or errors
-                    isLoading
-                        ? const CircularProgressIndicator()
-                        : errorMessage != null
-                        ? Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                    )
-                        : childData != null
-                        ? SizedBox(
-                      height: 300, // Provide a fixed height or use MediaQuery for dynamic height
-                      child: ListView.builder(
-                        itemCount: childData!.length,
-                        itemBuilder: (context, index) {
-                          var child = childData![index];
-                          int age = calculateAge(child['child_dateofbirth']); // Calculate age
-                          return GestureDetector(
-                            onTap: () {
-                              // Navigate to InfoChild page when the entire box is tapped
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => InfoChildPage(
-                                    childId: child['child_id'],
+                    Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        // Check loading state or errors
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : errorMessage != null
+                            ? Text(
+                          errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        )
+                            : childData != null
+                            ? SizedBox(
+                          height: 300, // Fixed height or dynamic height
+                          child: ListView.builder(
+                            itemCount: childData!.length,
+                            itemBuilder: (context, index) {
+                              var child = childData![index];
+                              int age =
+                              calculateAge(child['child_dateofbirth']);
+                              return GestureDetector(
+                                onTap: () {
+                                  // Navigate to InfoChild page when tapped
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => InfoChildPage(
+                                        childId: child['child_id'],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(vertical: 4),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 5),
+                                          Text(
+                                            child['child_fullname'] ??
+                                                'No Name',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Age: $age',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                          SizedBox(width: 2),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      EditChildInformationScreen(
+                                                        childId: child['child_id'],
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.blue,
+                                              shape: CircleBorder(),
+                                              minimumSize: Size(50, 50),
+                                            ),
+                                            child: Icon(Icons.edit, size: 20),
+                                          ),
+                                          SizedBox(width: 0),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              _deleteChild(
+                                                  context,
+                                                  child['child_id'].toString());
+                                              print(
+                                                  'child id: ${child['child_id'].toString()}');
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              shape: CircleBorder(),
+                                              minimumSize: Size(50, 50),
+                                            ),
+                                            child: Icon(Icons.delete, size: 20),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
                                 ),
                               );
                             },
-                            child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(width: 5),
-                                      Text(
-                                        child['child_fullname'] ?? 'No Name',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Age: $age', // Display the calculated age
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      SizedBox(width: 2), // Space between the buttons
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => EditChildInformationScreen(
-                                                  childId: child['child_id'],
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.blue,
-                                          shape: CircleBorder(), // Makes the button circular
-                                          minimumSize: Size(50, 50), // Ensure the button size is consistent (adjust as needed)
-                                        ),
-                                        child: Icon(Icons.edit, size: 20), // Icon size can be adjusted
-                                      ),
-                                      SizedBox(width: 0), // Space between the buttons
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          String childId = '123'; // Replace with actual child_id you want to delete
-                                          _deleteChild(context, child['child_id'].toString());
-                                          print('child id: ${child['child_id'].toString()}');
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          shape: CircleBorder(),
-                                          minimumSize: Size(50, 50),
-                                        ),
-                                        child: Icon(Icons.delete, size: 20),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                        : const SizedBox(), // Empty when no user data or error
+                          ),
+                        )
+                            : const SizedBox(), // Empty when no user data or error
+                      ],
+                    ),
                   ],
                 ),
-
-              ],
+              ),
             ),
           ),
-        ),
+
+          // Positioned BottomBar outside the Scaffold
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: const BottomBar(), // BottomBar positioned at the bottom
+          ),
+        ],
       ),
-      bottomNavigationBar: const BottomBar(),
     );
   }
+
 
   void _deleteChild(BuildContext context, String childId) async {
     final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'

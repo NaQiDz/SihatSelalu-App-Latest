@@ -125,93 +125,109 @@ class _AccountPageState extends State<AccountPage> {
         : dotenv.env['DB_HOST_IP']!;
 
     return Scaffold(
-      backgroundColor: Colors.blue.shade900, // Make Scaffold background transparent
       drawer: const SideBar(),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Header(),
-                SizedBox(height: screenHeight * 0.02),
-                CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  child: Builder(
-                    builder: (context) => IconButton(
-                      icon: Icon(
-                        FontAwesomeIcons.arrowLeft,
-                        color: Colors.white,
-                        size: 14,
+      body: Stack(
+        children: [
+          // Main content wrapped in SingleChildScrollView
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black, Colors.blue.shade900],
+              ),
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(screenWidth * 0.06),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Header(),
+                    SizedBox(height: screenHeight * 0.02),
+                    CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      child: Builder(
+                        builder: (context) => IconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.arrowLeft,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => HomePage()),
+                            );
+                          },
+                        ),
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomePage(
-                          )),
-                        );
-                      },
                     ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.00),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Account',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenHeight * 0.03,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    SizedBox(height: screenHeight * 0.00),
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Account',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenHeight * 0.03,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          if (userData?['Icon'] == null)
+                            CircleAvatar(
+                              radius: screenHeight * 0.06,
+                              backgroundImage: NetworkImage(
+                                  'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Default image
+                            ),
+                          if (userData?['Icon'] != null)
+                            CircleAvatar(
+                              radius: screenHeight * 0.06,
+                              backgroundImage: NetworkImage(
+                                  'http://$serverIp/SihatSelaluAppDatabase/' +
+                                      userData?['Icon']), // User image
+                            ),
+                          SizedBox(height: screenHeight * 0.01),
+                          Text(
+                            (username?.toUpperCase() ?? 'Unknown User'),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          _buildAccount(context),
+                          _buildAccountChild(context),
+                          _buildRecord(context),
+                          _buildHistory(context),
+                          _buildAbout(context),
+                          SizedBox(height: screenHeight * 0.1), // Add margin space at the bottom
+                        ],
                       ),
-                      SizedBox(height: screenHeight * 0.02),
-                      if (userData?['Icon'] == null)
-                        CircleAvatar(
-                          radius: screenHeight * 0.06,
-                          backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
-                        ),
-                      if (userData?['Icon'] != null)
-                        CircleAvatar(
-                          radius: screenHeight * 0.06,
-                          backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
-                        ),
-                      SizedBox(height: screenHeight * 0.01),
-                      Text(
-                        (username?.toUpperCase() ?? 'Unknown User'),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      _buildAccount(context),
-                      _buildAccountChild(context),
-                      _buildRecord(context),
-                      _buildHistory(context),
-                      _buildAbout(context),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+
+          // Positioned BottomBar outside the Scaffold
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: const BottomBar(), // BottomBar positioned at the bottom
+          ),
+        ],
       ),
-      bottomNavigationBar: const BottomBar(),
     );
   }
+
+
 
   Widget _buildAccount(BuildContext context) {
     return GestureDetector(

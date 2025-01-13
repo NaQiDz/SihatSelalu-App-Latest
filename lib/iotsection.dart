@@ -136,7 +136,9 @@ class _IOTPageToUse extends State<IOTPage> {
 
   void _startCountdownToBmiDialog() {
     Future.delayed(Duration(seconds: 5), () {
-      _showBmiDialog(context, calculateBmi(weightAsDouble, heightInMeters));
+       double bmi = weightAsDouble / (heightInMeters * heightInMeters);
+      _showBmiDialog(context, bmi);
+      insertBmi(heightInMeters, weightAsDouble,  bmi);
       _timer?.cancel();
     });
   }
@@ -147,8 +149,41 @@ class _IOTPageToUse extends State<IOTPage> {
     super.dispose();
   }
 
-  double calculateBmi(double weight, double height) {
-    return weight / (height * height);
+  Future<void> insertBmi(double height, double weight, double bmi) async {
+    final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP']!;
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      userData = null;
+    });
+
+    try {
+          String uri = "http://$serverIp/SihatSelaluAppDatabase/updatebmi.php";
+          var res = await http.post(
+          Uri.parse(uri),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+          'childid': widget.childId.toString(),
+          'child_height': height.toString(),
+          'child_weight': weight.toString(),
+          'child_bmi': bmi.toString(),
+          'recordDate': DateTime.now().toString(), // Set current time
+        }),
+      );
+      int id = widget.childId;
+      String date = DateTime.now().toIso8601String();
+      print('ChildId: $id, Height: $height, Weight: $weight, BMI: $bmi, Date: $date');
+          if (res.statusCode == 200) { // Correct variable used here
+            print('BMI record inserted successfully!');
+          } else {
+            print('BMI fail to record!');
+          }
+    } catch (e) {
+        errorMessage = 'Error: $e';
+    }
   }
 
   int calculateAge(String birthDateString) {

@@ -60,7 +60,8 @@ class RegisterStylePage extends StatelessWidget {
       } else {
         try {
           serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
-          String uri = "http://$serverIp/SihatSelaluAppDatabase/register.php";          var res = await http.post(
+          String uri = "http://$serverIp/SihatSelaluAppDatabase/register.php";
+          var res = await http.post(
             Uri.parse(uri),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({
@@ -74,6 +75,7 @@ class RegisterStylePage extends StatelessWidget {
           );
 
           var response = jsonDecode(res.body);
+          print('Response body: ${res.body}');
           if (response["success"] == "true") {
             showPopup(context, "Success", "Registration successful!", loginSession:true);
 
@@ -194,15 +196,12 @@ bool isValidEmail(String email) {
 }
 
 bool isValidPhoneNumber(String phoneNumber) {
-  // Use the formatter to preprocess the phone number
-  String formattedNumber = MalaysiaPhoneNumberFormatter().formatEditUpdate(
-    TextEditingValue.empty,
-    TextEditingValue(text: phoneNumber),
-  ).text;
+  // Define a regular expression for a valid phone number
+  String pattern = (r'^\+?[0-9]{10,15}$');
 
-  // Define the pattern for a valid Malaysian phone number
-  String pattern = r'^(60)\s(01[0-9]-\d{7,8}|0[3-9]-\d{6,8})$';
-  return RegExp(pattern).hasMatch(formattedNumber);
+  // Check if the phone number matches the pattern
+  return RegExp(pattern).hasMatch(phoneNumber);
+
 }
 
 bool isValidPassword(String password) {
@@ -316,43 +315,4 @@ void showPopup(BuildContext context, String textMessage, String message, {bool l
       );
     },
   );
-}
-
-
-class MalaysiaPhoneNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    final newText = newValue.text;
-
-    if (newText.isEmpty) {
-      return newValue;
-    }
-
-    // Remove non-digit characters
-    String digitsOnly = newText.replaceAll(RegExp(r'\D'), '');
-
-    // Add prefix if not present
-    if (!digitsOnly.startsWith('60')) {
-      digitsOnly = '60$digitsOnly';
-    }
-
-    // Format the number
-    String formattedNumber = '';
-    int digitIndex = 0;
-    for (int i = 0; i < digitsOnly.length; i++) {
-      if (i == 2) {
-        formattedNumber += ' '; // Space after 60
-      } else if (i == 5 || i == 8) {
-        formattedNumber += '-'; // Hyphens
-      }
-      formattedNumber += digitsOnly[digitIndex];
-      digitIndex++;
-    }
-
-    return TextEditingValue(
-      text: formattedNumber,
-      selection: TextSelection.collapsed(offset: formattedNumber.length),
-    );
-  }
 }
