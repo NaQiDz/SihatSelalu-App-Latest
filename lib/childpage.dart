@@ -270,7 +270,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Divider(color: Colors.grey),
-                    SizedBox(height: screenHeight * 0.05),
+                    SizedBox(height: screenHeight * 0.00),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -298,116 +298,114 @@ class _ChildrenPageState extends State<ChildrenPage> {
                         ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        // Check loading state or errors
-                        isLoading
-                            ? const CircularProgressIndicator()
-                            : errorMessage != null
-                            ? Text(
-                          errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        )
-                            : childData != null
-                            ? SizedBox(
-                          height: 300, // Fixed height or dynamic height
-                          child: ListView.builder(
-                            itemCount: childData!.length,
-                            itemBuilder: (context, index) {
-                              var child = childData![index];
-                              int age =
-                              calculateAge(child['child_dateofbirth']);
-                              return GestureDetector(
-                                onTap: () {
-                                  // Navigate to InfoChild page when tapped
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => InfoChildPage(
-                                        childId: child['child_id'],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(vertical: 4),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          SizedBox(width: 5),
-                                          Text(
-                                            child['child_fullname'] ??
-                                                'No Name',
-                                            style: TextStyle(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Age: $age',
-                                            style: TextStyle(color: Colors.white),
-                                          ),
-                                          SizedBox(width: 2),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      EditChildInformationScreen(
-                                                        childId: child['child_id'],
-                                                      ),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.blue,
-                                              shape: CircleBorder(),
-                                              minimumSize: Size(50, 50),
-                                            ),
-                                            child: Icon(Icons.edit, size: 20),
-                                          ),
-                                          SizedBox(width: 0),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              _deleteChild(
-                                                  context,
-                                                  child['child_id'].toString());
-                                              print(
-                                                  'child id: ${child['child_id'].toString()}');
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                              shape: CircleBorder(),
-                                              minimumSize: Size(50, 50),
-                                            ),
-                                            child: Icon(Icons.delete, size: 20),
-                                          ),
-                                        ],
-                                      )
-                                    ],
+                Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    // Check loading state or errors
+                    isLoading
+                        ? const CircularProgressIndicator()
+                        : errorMessage != null
+                        ? Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    )
+                        : childData != null
+                        ? SizedBox(
+                      height: 300, // Fixed height or dynamic height
+                      child: ListView.builder(
+                        itemCount: childData!.length,
+                        itemBuilder: (context, index) {
+                          var child = childData![index];
+                          int age = calculateAge(child['child_dateofbirth']);
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigate to InfoChild page when tapped
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => InfoChildPage(
+                                    childId: child['child_id'],
                                   ),
                                 ),
                               );
                             },
-                          ),
-                        )
-                            : const SizedBox(), // Empty when no user data or error
-                      ],
-                    ),
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 3),
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(width: 5),
+                                      Text(
+                                        child['child_fullname'] ?? 'No Name',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Age: $age',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      SizedBox(width: 2),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditChildInformationScreen(
+                                                    childId: child['child_id'],
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          shape: CircleBorder(),
+                                          minimumSize: Size(40, 40),
+                                        ),
+                                        child: Icon(Icons.edit, size: 20),
+                                      ),
+                                      SizedBox(width: 0),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _deleteChild(
+                                            context,
+                                            child['child_id'].toString(),
+                                          );
+                                          print(
+                                              'child id: ${child['child_id'].toString()}');
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: CircleBorder(),
+                                          minimumSize: Size(40, 40),
+                                        ),
+                                        child: Icon(Icons.delete, size: 20),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                        : const SizedBox(), // Empty when no user data or error
+                    SizedBox(height: 80), // Add this SizedBox for spacing at the bottom
                   ],
+                ),
+                ],
                 ),
               ),
             ),

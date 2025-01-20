@@ -3,8 +3,13 @@ import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:math';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -18,30 +23,129 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class ChartData {
-  final String x;
-  final double y;
-  final Color color;
+class HomePageToUse extends StatefulWidget {
+  HomePageToUse({super.key});
 
-  ChartData(this.x, this.y, this.color);
+  @override
+  _HomePageToUseState createState() => _HomePageToUseState();
 }
 
-class HomePageToUse extends StatelessWidget {
+class _HomePageToUseState extends State<HomePageToUse> {
   String? username = SessionManager.username;
   String? email = SessionManager.email;
+  List<ChartData> chartData = [];
+  List<ProgressBarData> progressBarData = [];
 
-  HomePageToUse({super.key});
+  @override
+  void initState() {
+    super.initState();
+    fetchChartData();
+    fetchProgressBarData();
+  }
+
+  Future<void> fetchChartData() async {
+    // Replace with your server's IP address and port
+    await dotenv.load(fileName: '.env');
+    String? serverIp;
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP'];
+    final response = await http.get(Uri.parse(
+        'http://$serverIp/SihatSelaluAppDatabase/childbardata.php'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      List<ChartData> fetchedData = [];
+      final random = Random();
+
+      for (var item in data) {
+        fetchedData.add(ChartData(
+          item['child_username'],
+          double.parse(item['total_records']),
+          Color.fromRGBO(
+            random.nextInt(256),
+            random.nextInt(256),
+            random.nextInt(256),
+            0.6,
+          ),
+        ));
+      }
+
+      setState(() {
+        chartData = fetchedData;
+      });
+    } else {
+      // Handle error
+      print('Failed to load data: ${response.statusCode}');
+    }
+  }
+
+  Future<void> fetchProgressBarData() async {
+    try {
+      // Load environment variables
+      await dotenv.load(fileName: '.env');
+
+      String? serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+          ? dotenv.env['DB_HOST_EMU']
+          : dotenv.env['DB_HOST_IP'];
+
+      if (serverIp == null || serverIp.isEmpty) {
+        throw Exception('Server IP not found in environment variables');
+      }
+
+      // Perform the HTTP GET request
+      final response = await http.get(Uri.parse('http://$serverIp/SihatSelaluAppDatabase/get_calorie_progress.php'));
+
+      // Check the response status code
+      if (response.statusCode == 200) {
+        // Attempt to parse the response body as JSON
+        try {
+          final List<dynamic> data = json.decode(response.body);
+          List<ProgressBarData> fetchedData = data.map((item) {
+            double totalCalorie = double.tryParse(item['total_calorie'] ?? '0') ?? 0;
+            double suggestedCalorie = double.tryParse(item['suggestion_calorie'] ?? '0') ?? 0;
+            double progressValue = suggestedCalorie > 0 ? totalCalorie / suggestedCalorie : 0;
+            if (progressValue > 1.0) {
+              progressValue = 1.0;
+            }
+            return ProgressBarData(
+              childUsername: item['child_username'] ?? '',
+              progressValue: progressValue,
+            );
+          }).toList();
+
+          // Update the state with the fetched data
+          setState(() {
+            progressBarData = fetchedData;
+          });
+        } catch (jsonError) {
+          print('Error parsing JSON response: $jsonError');
+        }
+      } else {
+        print('Failed to load progress data: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Catch and log any errors that occur during the process
+      print('Error fetching progress data: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    DateTime now = DateTime.now();
+    // Format the date using DateFormat
+    String formattedDate = DateFormat('d, MMM yyyy').format(now);
+
     return Scaffold(
+      backgroundColor: Colors.blue.shade900, // Scaffold background color
       drawer: const SideBar(),
       body: Stack(
         children: [
-          // The content of the page
+          // Main content wrapped in SingleChildScrollView
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -49,7 +153,7 @@ class HomePageToUse extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900], // Gradient for background
+                colors: [Colors.black, Colors.blue.shade900],
               ),
             ),
             child: SafeArea(
@@ -60,170 +164,220 @@ class HomePageToUse extends StatelessWidget {
                   children: [
                     const Header(),
                     SizedBox(height: screenHeight * 0.02),
-                    Text(
-                      'Today',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenHeight * 0.025,
+                    Padding(
+                      padding:
+                      EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: screenHeight * 0.02),
+                          Text(
+                            'Today | $formattedDate,',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenHeight * 0.025,
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          _buildUsageSection(screenHeight, screenWidth), // Custom widget
+                          SizedBox(height: screenHeight * 0.02),
+                          Center(
+                            child: Text(
+                              'Calorie Remaining',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenHeight * 0.02,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.01),
+                          for (var data in progressBarData)
+                            _buildProgressBar(screenWidth, data), // Custom widget
+                        ],
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildCircularChart(screenHeight),
-                    SizedBox(height: screenHeight * 0.02),
-                    Row(
-                      children: [
-                        _buildInfoCard(
-                          title: 'Weight:',
-                          icon: FontAwesomeIcons.weight,
-                          iconColor: Colors.red,
-                          screenWidth: screenWidth,
-                        ),
-                        SizedBox(width: screenWidth * 0.04),
-                        _buildInfoCard(
-                          title: 'Height:',
-                          icon: FontAwesomeIcons.ruler,
-                          iconColor: Colors.blue,
-                          screenWidth: screenWidth,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildWeightGoals(screenWidth),
+                    SizedBox(
+                        height: screenHeight *
+                            0.15), // Margin to allow space for BottomBar
                   ],
                 ),
               ),
             ),
           ),
 
-          // Positioned BottomBar at the bottom of the screen
+          // Positioned BottomBar outside the Scaffold
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: const BottomBar(), // Move BottomBar outside of Scaffold body
+            child: const BottomBar(), // BottomBar positioned at the bottom
           ),
         ],
       ),
     );
   }
 
+  Widget _buildProgressBar(double screenWidth, ProgressBarData data) {
+    int percentage = (data.progressValue * 100).toInt();
 
-  Widget _buildCircularChart(double screenHeight) {
     return Container(
-      padding: EdgeInsets.all(screenHeight * 0.02),
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Calories',
-            style: TextStyle(color: Colors.white),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Center(
-            child: SizedBox(
-              width: screenHeight * 0.25,
-              height: screenHeight * 0.25,
-              child: SfCircularChart(
-                annotations: <CircularChartAnnotation>[
-                  CircularChartAnnotation(
-                    widget: Text(
-                      '60%\nRemaining',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenHeight * 0.02,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                ],
-                series: <CircularSeries>[
-                  DoughnutSeries<ChartData, String>(
-                    dataSource: [
-                      ChartData('Consumed', 40, Colors.blue),
-                      ChartData('Remaining', 60, Colors.green),
-                    ],
-                    xValueMapper: (ChartData data, _) => data.x,
-                    yValueMapper: (ChartData data, _) => data.y,
-                    pointColorMapper: (ChartData data, _) => data.color,
-                    innerRadius: '90%',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required double screenWidth,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: screenWidth * 0.02),
-            Icon(
-              icon,
-              color: iconColor,
-              size: screenWidth * 0.08,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeightGoals(double screenWidth) {
-    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: screenWidth * 0.04), // Add margin between progress bars
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
         color: Colors.grey.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Weight Goals:',
-            style: TextStyle(color: Colors.white),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                data.childUsername,
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                '$percentage%',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
           ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  Text(
-                    '${95 - (index * 5)} kg',
-                    style: TextStyle(color: Colors.white),
+          SizedBox(height: screenWidth * 0.02),
+          Container(
+            height: screenWidth * 0.03,
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: data.progressValue,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.pink,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
                   ),
-                  Divider(color: Colors.white),
-                ],
-              );
-            },
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-//To put widget or section
+
+  Widget _buildUsageSection(double screenHeight, double screenWidth) {
+    // Calculate total for percentages
+    double total = chartData.fold(0, (sum, item) => sum + item.y);
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(screenWidth * 0.04),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'IoT Usage',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: screenHeight * 0.02,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: screenHeight * 0.02),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: screenWidth * 0.45,
+                height: screenWidth * 0.5,
+                child: SfCircularChart(
+                  series: <CircularSeries>[
+                    PieSeries<ChartData, String>(
+                      dataSource: chartData,
+                      pointColorMapper: (ChartData data, _) => data.color,
+                      xValueMapper: (ChartData data, _) => data.x,
+                      yValueMapper: (ChartData data, _) => data.y,
+                      dataLabelMapper: (ChartData data, _) =>
+                      '${data.x}\n${(data.y / total * 100).toStringAsFixed(0)}%', // Show name and percentage
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: true,
+                        textStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: screenHeight *
+                                0.012), // Adjust label style
+                      ),
+                      radius: '100%',
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: screenWidth * 0.04),
+              // Legend with percentages
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: chartData.map((data) {
+                  return Padding(
+                    padding:
+                    EdgeInsets.symmetric(vertical: screenHeight * 0.005),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: screenWidth * 0.03,
+                          height: screenWidth * 0.03,
+                          decoration: BoxDecoration(
+                            color: data.color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        Text(
+                          '${data.x}: ${(data.y / total * 100).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenHeight * 0.015),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ChartData {
+  ChartData(this.x, this.y, this.color);
+
+  final String x;
+  final double y;
+  final Color color;
+}
+
+class ProgressBarData {
+  final String childUsername;
+  final double progressValue;
+
+  ProgressBarData({
+    required this.childUsername,
+    required this.progressValue,
+  });
 }

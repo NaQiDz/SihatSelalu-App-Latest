@@ -1,3 +1,4 @@
+import 'package:SihatSelaluApp/privacy.dart';
 import 'package:SihatSelaluApp/profilepage.dart';
 import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/started.dart';
@@ -52,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.person, color: Colors.white),
                       title: const Text("Profile", style: TextStyle(color: Colors.white)),
-                      subtitle: const Text("Edit your profile details", style: TextStyle(color: Colors.white70)),
+                      subtitle: const Text("View your profile details", style: TextStyle(color: Colors.white70)),
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
                         // Add navigation or functionality for profile settings
@@ -73,6 +74,7 @@ class SettingsScreen extends StatelessWidget {
                       title: const Text("Privacy", style: TextStyle(color: Colors.white)),
                       subtitle: const Text("Adjust privacy preferences", style: TextStyle(color: Colors.white70)),
                       onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyPage()));
                         // Add navigation or functionality for privacy settings
                       },
                     ),

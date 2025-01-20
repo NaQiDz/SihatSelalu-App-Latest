@@ -2,6 +2,7 @@ import 'package:SihatSelaluApp/about_system.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/child_history.dart';
 import 'package:SihatSelaluApp/childpage.dart';
+import 'package:SihatSelaluApp/choosechildrecord.dart';
 import 'package:SihatSelaluApp/header.dart';
 import 'package:SihatSelaluApp/home.dart';
 import 'package:SihatSelaluApp/parent_history.dart';
@@ -49,7 +50,6 @@ class _AccountPageState extends State<AccountPage> {
     super.initState();
     _loadSessionData();
     fetchUser(); // Fetch data automatically on app start
-
   }
 
   void _loadSessionData() async{
@@ -320,7 +320,7 @@ class _AccountPageState extends State<AccountPage> {
         // Navigate to ProfilePage when the entire box is tapped
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ParentHistoryPage()), // Replace with your actual ProfilePage
+          MaterialPageRoute(builder: (context) => ChooseRecordPage()), // Replace with your actual ProfilePage
         );
       },
       child: Container(

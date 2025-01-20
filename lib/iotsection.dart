@@ -47,7 +47,7 @@ class _IOTPageToUse extends State<IOTPage> {
         final data = json.decode(response.body);
         double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
         setState(() {
-          _weight = "${weight.toStringAsFixed(3)} ${data['unit']}";
+          _weight = "${(weight * 2).toStringAsFixed(3)} ${data['unit']}";
           weightAsDouble = weight;
         });
 
@@ -64,7 +64,7 @@ class _IOTPageToUse extends State<IOTPage> {
   }
 
   Future<void> fetchHeight() async {
-    final url = Uri.parse('http://172.20.10.3/height'); // Replace with your ESP8266 IP
+    final url = Uri.parse('http://172.20.10.2/height'); // Replace with your ESP8266 IP
     try {
       final response = await http.get(url); // Send GET request using http package
       if (response.statusCode == 200) {
@@ -286,10 +286,10 @@ class _IOTPageToUse extends State<IOTPage> {
                                 child: TextFormField(
                                   decoration: InputDecoration(
                                     labelText: userData?['child_fullname'] ?? 'Unknown Name',
-                                    labelStyle: TextStyle(color: Colors.white),
+                                    labelStyle: TextStyle(color: Colors.black),
                                     filled: false,
                                     enabled: false,
-                                    fillColor: Colors.transparent,
+                                    fillColor: Colors.black,
                                     prefixIcon: Icon(Icons.person),
                                   ),
                                 ),
@@ -300,7 +300,7 @@ class _IOTPageToUse extends State<IOTPage> {
                                 child: TextFormField(
                                   decoration: InputDecoration(
                                     labelText: userData?['child_gender'] ?? 'Unknown Name',
-                                    labelStyle: TextStyle(color: Colors.white),
+                                    labelStyle: TextStyle(color: Colors.black),
                                     filled: false,
                                     enabled: false,
                                     fillColor: Colors.transparent,
@@ -314,7 +314,7 @@ class _IOTPageToUse extends State<IOTPage> {
                                 child: TextFormField(
                                   decoration: InputDecoration(
                                     labelText: '$age Years',
-                                    labelStyle: TextStyle(color: Colors.white),
+                                    labelStyle: TextStyle(color: Colors.black),
                                     filled: false,
                                     enabled: false,
                                     fillColor: Colors.transparent,
@@ -463,7 +463,7 @@ class _IOTPageToUse extends State<IOTPage> {
             minimum: 0,
             maximum: 75,
             pointers: <GaugePointer>[
-              NeedlePointer(value: weightAsDouble, enableAnimation: true),
+              NeedlePointer(value: (weightAsDouble * 2), enableAnimation: true),
             ],
             ranges: <GaugeRange>[
               GaugeRange(startValue: 0, endValue: 25, color: Colors.green),

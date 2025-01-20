@@ -1,15 +1,18 @@
-import 'package:SihatSelaluApp/bottombar.dart';
-import 'package:SihatSelaluApp/header.dart';
-import 'package:SihatSelaluApp/sidebar.dart';
+import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:SihatSelaluApp/bottombar.dart';
+import 'package:SihatSelaluApp/header.dart';
+import 'package:SihatSelaluApp/sidebar.dart';
 
 class MealPlan extends StatefulWidget {
-  const MealPlan({Key? key}) : super(key: key);
+  final int childId;
+  const MealPlan({super.key, required this.childId});
+
 
   @override
   _MealPlanState createState() => _MealPlanState();
@@ -29,13 +32,13 @@ class _MealPlanState extends State<MealPlan> {
   void initState() {
     super.initState();
     generateWeekData();
-    fetchMeals(); // Fetch meals for the week from the backend
+    fetchMeals();
   }
 
   void generateWeekData() {
     DateTime today = DateTime.now();
-    DateTime startOfWeek = today.subtract(Duration(days: today.weekday % 7));
-    List<String> daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    DateTime startOfWeek = today.subtract(Duration(days: today.weekday - 1)); // Start from Monday
+    List<String> daysOfWeek = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
     List<Map<String, dynamic>> tempWeekData = [];
 
     for (int i = 0; i < 7; i++) {
@@ -50,23 +53,26 @@ class _MealPlanState extends State<MealPlan> {
     setState(() {
       weekData.clear();
       weekData.addAll(tempWeekData);
+      selectedDayIndex = today.weekday - 1; // Highlight today initially
     });
+
+    // Fetch saved meals for today initially
+    fetchSavedMeals(weekData[selectedDayIndex]['date']);
   }
 
   Future<void> fetchMeals() async {
-    await dotenv.load(fileName:'.env');
-    String? serverIp;
-    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    await dotenv.load(fileName: '.env');
+    String? serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']
+        : dotenv.env['DB_HOST_IP'];
     try {
-      final response = await http.get(Uri.parse(
-          'http://$serverIp/SihatSelaluAppDatabase/ai_power/meal_recommendation.php'));
-
+      final url = Uri.parse('http://$serverIp/SihatSelaluAppDatabase/ai_power/meal_recommendation.php');
+      final response = await http.post(url, body: {'childid': widget.childId.toString()});
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        if (data.containsKey('error')) {
-          print("Error from API: ${data['error']}");
-          return;
+        if (data.containsKey('meals_by_day')) {
+          print("Fetched meals data: $data");
         }
 
         final List<dynamic> mealData = data['meals_by_day'] ?? [];
@@ -93,18 +99,16 @@ class _MealPlanState extends State<MealPlan> {
   }
 
   Future<void> saveSelectedMeals(String date, List<Map<String, dynamic>> selectedMeals) async {
-    await dotenv.load(fileName:'.env');
-    String? serverIp;
-    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    await dotenv.load(fileName: '.env');
+    String? serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']
+        : dotenv.env['DB_HOST_IP'];
     try {
-      // Convert the date from dd/MM/yyyy to yyyy-MM-dd format
       DateTime parsedDate = DateFormat('dd/MM/yyyy').parse(date);
       String formattedDate = DateFormat('yyyy-MM-dd').format(parsedDate);
 
-      // Log the selected meals to debug
       print("Selected meals: $selectedMeals");
 
-      // Ensure all selected meals have food_id
       for (var meal in selectedMeals) {
         if (!meal.containsKey('food_id')) {
           print("Error: Meal does not contain food_id: $meal");
@@ -115,17 +119,16 @@ class _MealPlanState extends State<MealPlan> {
         Uri.parse('http://$serverIp/SihatSelaluAppDatabase/ai_power/save_meals.php'),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          "date": formattedDate, // Pass the formatted date
-          "child_id": 1, // Replace with dynamic child_id if needed
+          "date": formattedDate,
+          "child_id": widget.childId.toString(),
           "meals": selectedMeals.map((meal) {
             return {
-              "food_id": meal['food_id'], // Ensure we pass the food_id
+              "food_id": meal['food_id'],
             };
           }).toList(),
         }),
       );
 
-      // Log response for debugging
       print("Response Status: ${response.statusCode}");
       print("Response Body: ${response.body}");
 
@@ -135,6 +138,7 @@ class _MealPlanState extends State<MealPlan> {
           print("Meals saved successfully.");
         } else {
           print("Error saving meals: ${data['error']}");
+          _showErrorDialog(data['error']);
         }
       } else {
         print("Failed to save meals. Status code: ${response.statusCode}");
@@ -144,6 +148,63 @@ class _MealPlanState extends State<MealPlan> {
     }
   }
 
+  Future<void> fetchSavedMeals(String date) async {
+    await dotenv.load(fileName: '.env');
+    String? serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
+        ? dotenv.env['DB_HOST_EMU']
+        : dotenv.env['DB_HOST_IP'];
+    try {
+      DateTime parsedDate = DateFormat('dd/MM/yyyy').parse(date);
+      String formattedDate = DateFormat('yyyy-MM-dd').format(parsedDate);
+
+      final response = await http.get(
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/ai_power/get_saved_meals.php?child_id=${widget.childId.toString()}&date=$formattedDate'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data.containsKey('error')) {
+          print("Error from API: ${data['error']}");
+          return;
+        }
+
+        final savedMeals = data['meals'] ?? {};
+        setState(() {
+          selectedMealsByType = {
+            "BREAKFAST": List<Map<String, dynamic>>.from(savedMeals['breakfast'] ?? []),
+            "LUNCH": List<Map<String, dynamic>>.from(savedMeals['lunch'] ?? []),
+            "DINNER": List<Map<String, dynamic>>.from(savedMeals['dinner'] ?? []),
+          };
+        });
+      } else {
+        print("Failed to fetch saved meals. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Network error while fetching saved meals: $e");
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Error"),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   String get todayDate {
     final DateTime now = DateTime.now();
@@ -154,13 +215,13 @@ class _MealPlanState extends State<MealPlan> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final screenHeight = size.height;
-    final screenWidth = size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.blue.shade900,
-        drawer: const SideBar(), // Add the drawer
+        drawer: const SideBar(),
         body: Stack(
           children: [
             Container(
@@ -175,12 +236,12 @@ class _MealPlanState extends State<MealPlan> {
               ),
               child: SafeArea(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.all(screenWidth * 0.04),
+                  padding: EdgeInsets.all(size.width * 0.04),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Header(), // Add Header from the first method
-                      SizedBox(height: screenHeight * 0.02),
+                      const Header(),
+                      SizedBox(height: screenHeight * 0.00),
                       CircleAvatar(
                         backgroundColor: Colors.transparent,
                         child: Builder(
@@ -191,71 +252,81 @@ class _MealPlanState extends State<MealPlan> {
                               size: 14,
                             ),
                             onPressed: () {
-                              // back button navigation logic here
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomePage()),
+                              );
                             },
                           ),
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.02),
+                      SizedBox(height: screenHeight * 0.00),
                       Center(
                         child: Text(
                           "Today, $todayDate",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: screenWidth * 0.05,
+                            fontSize: size.width * 0.05,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.02),
+                      SizedBox(height: size.height * 0.00),
                       // Week navigation bar (days)
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(7, (index) {
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedDayIndex = index;
-                                  selectedMealsByType = {
-                                    "BREAKFAST": [],
-                                    "LUNCH": [],
-                                    "DINNER": []
-                                  };
-                                });
-                              },
-                              child: CircleAvatar(
-                                radius: screenWidth * 0.06,
-                                backgroundColor: selectedDayIndex == index
-                                    ? weekData[index]['color']
-                                    : Colors.grey[700],
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      weekData[index]['day'],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: screenWidth * 0.03,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: List.generate(7, (index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedDayIndex = index;
+                                    // Clear the selected meals when day is changed
+                                    selectedMealsByType = {
+                                      "BREAKFAST": [],
+                                      "LUNCH": [],
+                                      "DINNER": []
+                                    };
+                                  });
+                                  fetchSavedMeals(weekData[index]['date']);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  child: CircleAvatar(
+                                    radius: size.width * 0.06,
+                                    backgroundColor: selectedDayIndex == index
+                                        ? weekData[index]['color']
+                                        : Colors.grey[700],
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          weekData[index]['day'],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: size.width * 0.04,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          weekData[index]['date'].toString().substring(0, 5),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: size.width * 0.025,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      weekData[index]['date'],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: screenWidth * 0.02,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            }),
+                          ),
                         ),
                       ),
-                      // Meal Items
+                      // Meal Item - Breakfast
                       MealItem(
                         mealType: "BREAKFAST",
                         meals: mealsByDay[selectedDayIndex]?['breakfast'] ?? [],
@@ -263,6 +334,7 @@ class _MealPlanState extends State<MealPlan> {
                         onTap: (meals) => _showFoodSelectionDialog(meals, "BREAKFAST"),
                         selectedMeals: selectedMealsByType["BREAKFAST"]!,
                       ),
+                      // Meal Item - Lunch
                       MealItem(
                         mealType: "LUNCH",
                         meals: mealsByDay[selectedDayIndex]?['lunch'] ?? [],
@@ -270,6 +342,7 @@ class _MealPlanState extends State<MealPlan> {
                         onTap: (meals) => _showFoodSelectionDialog(meals, "LUNCH"),
                         selectedMeals: selectedMealsByType["LUNCH"]!,
                       ),
+                      // Meal Item - Dinner
                       MealItem(
                         mealType: "DINNER",
                         meals: mealsByDay[selectedDayIndex]?['dinner'] ?? [],
@@ -277,6 +350,7 @@ class _MealPlanState extends State<MealPlan> {
                         onTap: (meals) => _showFoodSelectionDialog(meals, "DINNER"),
                         selectedMeals: selectedMealsByType["DINNER"]!,
                       ),
+                      // Save Meal Button
                       SizedBox(height: 20),
                       Center(
                         child: ElevatedButton(
@@ -286,25 +360,22 @@ class _MealPlanState extends State<MealPlan> {
                               ...selectedMealsByType["LUNCH"]!,
                               ...selectedMealsByType["DINNER"]!,
                             ];
-                            saveSelectedMeals(
-                                weekData[selectedDayIndex]['date'],
-                                selectedMeals
-                            );
+                            saveSelectedMeals(weekData[selectedDayIndex]['date'], selectedMeals);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.lightBlueAccent,
-                            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.2, vertical: screenWidth * 0.05),
+                            padding: EdgeInsets.symmetric(horizontal: size.width * 0.2, vertical: size.width * 0.05),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
                           child: Text(
                             "Save Meals",
-                            style: TextStyle(fontSize: screenWidth * 0.05),
+                            style: TextStyle(fontSize: size.width * 0.05),
                           ),
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.15), // Space for BottomBar
+                      SizedBox(height: screenHeight * 0.15), // Margin to allow space for BottomBar
                     ],
                   ),
                 ),
@@ -314,7 +385,7 @@ class _MealPlanState extends State<MealPlan> {
               bottom: 0,
               left: 0,
               right: 0,
-              child: const BottomBar(), // BottomBar from the first method
+              child: const BottomBar(),
             ),
           ],
         ),
@@ -323,16 +394,14 @@ class _MealPlanState extends State<MealPlan> {
     );
   }
 
-
-  Future<void> _showFoodSelectionDialog(
-      List<Map<String, dynamic>> meals, String mealType) async {
+  Future<void> _showFoodSelectionDialog(List<Map<String, dynamic>> meals, String mealType) async {
     List<Map<String, dynamic>> selectedMeals = List.from(selectedMealsByType[mealType]!);
 
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Select $mealType"),
+          title: Text("SELECT $mealType"),
           content: SingleChildScrollView(
             child: Column(
               children: meals.map((meal) {
@@ -426,14 +495,14 @@ class MealItem extends StatelessWidget {
             ...selectedMeals.map((meal) {
               return ListTile(
                 title: Text(
-                  meal['food_name'],
+                  meal['food_name'] ?? 'No name available',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: size.width * 0.04,
                   ),
                 ),
                 subtitle: Text(
-                  '${meal['food_calories_100g']} kcal, ${meal['serving_size']} g serving',
+                  '${meal['food_calories_100g'] ?? 'N/A'} kcal, ${meal['serving_size'] ?? 'N/A'} g serving',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: size.width * 0.03,
@@ -456,7 +525,7 @@ class MealItem extends StatelessWidget {
             TextButton(
               onPressed: () => onTap(meals),
               child: Text(
-                "Select $mealType",
+                "SELECT $mealType",
                 style: TextStyle(
                   color: Colors.blueAccent,
                   fontSize: size.width * 0.04,

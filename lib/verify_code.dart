@@ -32,7 +32,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     }
 
     try {
-      final url = Uri.parse('http://10.131.74.170/SihatSelaluAppDatabase/verify_code.php');
+      final url = Uri.parse('http://192.168.0.145/SihatSelaluAppDatabase/verify_code.php');
       final response = await http.post(
         url,
         body: {
@@ -41,26 +41,37 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
         },
       );
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+      // Log the response body
+      print("Response body: ${response.body}");
 
-        if (responseData['status'] == 'success') {
-          _showPopupMessage(
-            "Success",
-            "Password reset successfully.",
-            onClose: () {
-              // Navigate to login page after success
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+      if (response.statusCode == 200) {
+        try {
+          final responseData = json.decode(response.body);
+
+          // Check if response is valid and contains the necessary keys
+          if (responseData.containsKey('status')) {
+            if (responseData['status'] == 'success') {
+              _showPopupMessage(
+                "Success",
+                "Password reset successfully.",
+                onClose: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                },
               );
-            },
-          );
-        } else {
-          _showPopupMessage(
-            "Error",
-            responseData['message'] ?? 'Invalid code or error resetting password.',
-          );
+            } else {
+              _showPopupMessage(
+                "Error",
+                responseData['message'] ?? 'Invalid code or error resetting password.',
+              );
+            }
+          } else {
+            _showPopupMessage("Error", "Unexpected response format.");
+          }
+        } catch (e) {
+          _showPopupMessage("Error", "Failed to parse response: $e");
         }
       } else {
         _showPopupMessage("Server Error", 'Error: ${response.reasonPhrase}');
@@ -69,6 +80,8 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
       _showPopupMessage("Error", "An unexpected error occurred: $e");
     }
   }
+
+
 
   void _showPopupMessage(String title, String message, {VoidCallback? onClose}) {
     showDialog(

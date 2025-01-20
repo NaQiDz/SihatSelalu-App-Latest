@@ -69,14 +69,17 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         }
       } else {
         _showPopupMessage("Server Error", "Unable to send the request.");
+        print('Error: Server returned status code ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
       _showPopupMessage("Error", "Unexpected error occurred: $e");
+      print('Error: $e'); // This will print the error to the console
     }
   }
+
 
   void _showPopupMessage(String title, String message, {VoidCallback? onClose}) {
     showDialog(
