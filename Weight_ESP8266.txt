@@ -15,7 +15,7 @@ const int LOADCELL_SCK_PIN = 0;  // GPIO0 (D3 on NodeMCU)
 
 HX711 scale;
 
-// Define calibration factor (adjust this after calibration)
+// Adjust this factor based on calibration
 float calibration_factor = 40000.0;
 
 void setup() {
@@ -38,7 +38,7 @@ void setup() {
   // Check HX711 readiness
   unsigned long startMillis = millis();
   while (!scale.is_ready()) {
-    if (millis() - startMillis > 5000) { // Timeout after 5 seconds
+    if (millis() - startMillis > 5000) {
       Serial.println("Error: HX711 not detected. Check wiring and power.");
       return;
     }
@@ -55,7 +55,7 @@ void setup() {
     if (scale.is_ready()) {
       scale.set_scale(calibration_factor);
       float raw_weight = scale.get_units(10); // Average of 10 readings
-      float weight = (raw_weight > -0.05 && raw_weight < 0.05) ? 0.0 : raw_weight; // Ensure 0 for small noise
+      float weight = (raw_weight > -0.05 && raw_weight < 0.05) ? 0.0 : raw_weight;
 
       // Create a JSON object
       StaticJsonDocument<200> doc;
