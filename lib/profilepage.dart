@@ -180,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
+            colors: [Colors.white, Colors.lightBlue.shade900],
           ),
         ),
         child: SafeArea(
@@ -197,7 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     builder: (context) => IconButton(
                       icon: Icon(
                         FontAwesomeIcons.arrowLeft,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 14,
                       ),
                       onPressed: () {
@@ -216,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         'Profile',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: screenHeight * 0.025,
                           fontWeight: FontWeight.bold,
                         ),
@@ -226,28 +226,30 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            if (userData?['Icon'] == null)
-                            CircleAvatar(
-                              radius: screenHeight * 0.06,
-                              backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
-                              backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
-                            ),
-                            if (userData?['Icon'] != null)
-                            CircleAvatar(
-                              radius: screenHeight * 0.06,
-                              backgroundImage: NetworkImage('http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
-                              backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
-                            ),
+                            if (userData?['Icon'] == null || userData?['Icon'] == 'null') // Check for both null and the string 'null'
+                              CircleAvatar(
+                                radius: screenHeight * 0.04,
+                                backgroundImage: NetworkImage(
+                                  'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
+                                ),
+                              ),
+                            if (userData?['Icon'] != null && userData?['Icon'] != 'null') // Check for both null and the string 'null'
+                              CircleAvatar(
+                                radius: screenHeight * 0.04,
+                                backgroundImage: NetworkImage(
+                                  'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon'] ?? ''}', // Use ?? '' to handle null
+                                ),
+                              ),
                             if(_uploadedImageUrl.isNotEmpty)
                               CircleAvatar(
                                 radius: screenHeight * 0.06,
                                 backgroundImage: NetworkImage(_uploadedImageUrl), // Use user image or default
-                                backgroundColor: showEditButton ? Colors.white.withOpacity(0.5) : Colors.transparent,
+                                backgroundColor: showEditButton ? Colors.black.withOpacity(0.5) : Colors.transparent,
                               ),
                             if (showEditButton)
                               CircleAvatar(
                                 radius: screenHeight * 0.06,
-                                  backgroundColor: Colors.black.withOpacity(0.8),
+                                  backgroundColor: Colors.grey.withOpacity(0.5),
                               ),// Show the edit text conditionally
                             if (showEditButton)
                               GestureDetector(
@@ -261,7 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   child: Text(
                                     "Edit",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.black,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
@@ -282,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         username2!.toUpperCase(),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -307,7 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return Center(
         child: Text(
           isLoading ? "Loading..." : "Error: $errorMessage",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
       );
     }
@@ -330,12 +332,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Icon(
                       FontAwesomeIcons.edit,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     SizedBox(width: 4),
                     Text(
                       isEditable ? 'Cancel' : 'Edit',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black),
                     ),
                   ],
                 ),
@@ -374,14 +376,14 @@ class _ProfilePageState extends State<ProfilePage> {
         enabled: false, // Now you can use isEditable directly
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.white, fontSize: 13),
+          labelStyle: TextStyle(color: Colors.black, fontSize: 13),
           filled: true,
           fillColor: Colors.grey.withOpacity(0.2),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.black),
       ),
     );
   }
@@ -396,11 +398,11 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: Colors.black.withOpacity(0.6),
+          backgroundColor: Colors.white.withOpacity(0.6),
           title: Center(
             child: Text(
               'Upload Image',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ),
           content: SizedBox(
@@ -434,7 +436,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                       child: Text(
                         _image == null ? "Pick Image" : "Change Image",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
@@ -448,7 +450,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop(); // Close the dialog
               },
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: Colors.black,
               ),
               child: Text(
                 'Cancel',
@@ -461,7 +463,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: Colors.black,
               ),
               child: Text(
                 'Upload',

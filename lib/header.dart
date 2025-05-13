@@ -20,7 +20,7 @@ class Header extends StatelessWidget {
                 builder: (context) => IconButton(
                   icon: Icon(
                     FontAwesomeIcons.bars,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
@@ -30,9 +30,9 @@ class Header extends StatelessWidget {
             ),
             SizedBox(width: screenWidth * 0.19),
             Text(
-              'SihatSelalu App',
+              'NutriGuardian',
               style: TextStyle(
-                color: Colors.blue[900],
+                color: Colors.black,
                 fontSize: screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
               ),
@@ -41,7 +41,7 @@ class Header extends StatelessWidget {
         ),
         Icon(
           FontAwesomeIcons.bell,
-          color: Colors.white,
+          color: Colors.black,
         ),
       ],
     );

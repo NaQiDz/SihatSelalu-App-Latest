@@ -1,11 +1,10 @@
 import 'package:SihatSelaluApp/bottombar.dart';
 import 'package:SihatSelaluApp/header.dart';
-import 'package:SihatSelaluApp/session_manager.dart';
 import 'package:SihatSelaluApp/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -31,19 +30,41 @@ class HomePageToUse extends StatefulWidget {
 }
 
 class _HomePageToUseState extends State<HomePageToUse> {
-  String? username = SessionManager.username;
-  String? email = SessionManager.email;
   List<ChartData> chartData = [];
   List<ProgressBarData> progressBarData = [];
+  bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    fetchChartData();
-    fetchProgressBarData();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      await fetchChartData();
+      await fetchProgressBarData();
+    } catch (e) {
+      setState(() {
+        errorMessage = '\n\n\n\n\n\n\n\n\n\n\nPlease Add Your Child And Use IOT First';
+      });
+      print('Error fetching data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> fetchChartData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('ID');
     // Replace with your server's IP address and port
     await dotenv.load(fileName: '.env');
     String? serverIp;
@@ -51,7 +72,7 @@ class _HomePageToUseState extends State<HomePageToUse> {
         ? dotenv.env['DB_HOST_EMU']!
         : dotenv.env['DB_HOST_IP'];
     final response = await http.get(Uri.parse(
-        'http://$serverIp/SihatSelaluAppDatabase/childbardata.php'));
+        'http://$serverIp/SihatSelaluAppDatabase/childbardata.php?userId=$userId'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -76,11 +97,13 @@ class _HomePageToUseState extends State<HomePageToUse> {
       });
     } else {
       // Handle error
-      print('Failed to load data: ${response.statusCode}');
+      throw Exception('Failed to load chart data: ${response.statusCode}');
     }
   }
 
   Future<void> fetchProgressBarData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('ID');
     try {
       // Load environment variables
       await dotenv.load(fileName: '.env');
@@ -94,7 +117,7 @@ class _HomePageToUseState extends State<HomePageToUse> {
       }
 
       // Perform the HTTP GET request
-      final response = await http.get(Uri.parse('http://$serverIp/SihatSelaluAppDatabase/get_calorie_progress.php'));
+      final response = await http.get(Uri.parse('http://$serverIp/SihatSelaluAppDatabase/get_calorie_progress.php?userId=$userId'));
 
       // Check the response status code
       if (response.statusCode == 200) {
@@ -119,17 +142,16 @@ class _HomePageToUseState extends State<HomePageToUse> {
             progressBarData = fetchedData;
           });
         } catch (jsonError) {
-          print('Error parsing JSON response: $jsonError');
+          throw Exception('Error parsing JSON response: $jsonError');
         }
       } else {
-        print('Failed to load progress data: ${response.statusCode}');
+        throw Exception('Failed to load progress data: ${response.statusCode}');
       }
     } catch (e) {
       // Catch and log any errors that occur during the process
-      print('Error fetching progress data: $e');
+      throw Exception('Error fetching progress data: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +175,7 @@ class _HomePageToUseState extends State<HomePageToUse> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900],
+                colors: [Colors.white, Colors.lightBlue.shade900],
               ),
             ),
             child: SafeArea(
@@ -174,14 +196,27 @@ class _HomePageToUseState extends State<HomePageToUse> {
                           Text(
                             'Today | $formattedDate,',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: screenHeight * 0.025,
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-                          _buildUsageSection(screenHeight, screenWidth), // Custom widget
+                          if (isLoading)
+                            Center(child: CircularProgressIndicator())
+                          else if (errorMessage.isNotEmpty)
+                            Center(
+                              child: Text(
+                                errorMessage,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: screenHeight * 0.02,
+                                ),
+                              ),
+                            )
+                          else
+                            _buildUsageSection(screenHeight, screenWidth), // Custom widget
                           SizedBox(height: screenHeight * 0.02),
-                          Center(
+                          Center( // Center the Calorie Remaining text
                             child: Text(
                               'Calorie Remaining',
                               style: TextStyle(
@@ -192,8 +227,9 @@ class _HomePageToUseState extends State<HomePageToUse> {
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.01),
-                          for (var data in progressBarData)
-                            _buildProgressBar(screenWidth, data), // Custom widget
+                          if (!isLoading && errorMessage.isEmpty)
+                            for (var data in progressBarData)
+                              _buildProgressBar(screenWidth, data), // Custom widget
                         ],
                       ),
                     ),
@@ -220,7 +256,6 @@ class _HomePageToUseState extends State<HomePageToUse> {
 
   Widget _buildProgressBar(double screenWidth, ProgressBarData data) {
     int percentage = (data.progressValue * 100).toInt();
-
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: screenWidth * 0.04), // Add margin between progress bars

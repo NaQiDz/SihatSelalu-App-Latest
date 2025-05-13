@@ -1,5 +1,6 @@
 import 'package:SihatSelaluApp/bmi_bar.dart';
 import 'package:SihatSelaluApp/caloriechild.dart';
+import 'package:SihatSelaluApp/childdailycalorie.dart';
 import 'package:SihatSelaluApp/choosechild.dart';
 import 'package:SihatSelaluApp/choosechildmealplan.dart';
 import 'package:SihatSelaluApp/home.dart';
@@ -17,7 +18,7 @@ class BottomBar extends StatelessWidget {
         Container(
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.black87, // Bottom bar color (use same color as gradient or transparency)
+            color: Colors.white, // Bottom bar color (use same color as gradient or transparency)
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(50),
               topRight: Radius.circular(50),
@@ -27,17 +28,11 @@ class BottomBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItemBottom(Icons.home, 'Home', context, HomePage()),
-              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, CalorieChildPage()),
-              SizedBox(width: 20), // Space for the floating QR icon
+              _buildNavItemBottom(Icons.track_changes, 'Track Calorie', context, ChildrenDailyCaloriePage()),
+              SizedBox(width: 20),
               _buildNavItemBottom(Icons.tips_and_updates, 'Plan', context, ChooseMealPage()),
-              _buildNavItemBottom(
-                Icons.calculate,
-                'Calculate BMI',
-                context, BMIBarPage(
-                themeUpdater: ({required String name, required Brightness brightness, required double contrast}) {
-                  // Provide a valid function body here
-                  // For now, it's a placeholder that does nothing
-                },
+              _buildNavItemBottom(Icons.calculate,'Calculate BMI',context, BMIBarPage(
+                themeUpdater: ({required String name, required Brightness brightness, required double contrast}) {},
               ),
               ),
             ],
@@ -59,7 +54,7 @@ class BottomBar extends StatelessWidget {
               width: 60, // Make the circle bigger
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.white, // Scale Button background color
+                color: Colors.blue, // Scale Button background color
                 shape: BoxShape.circle, // Ensures the circle shape
                 boxShadow: [
                   BoxShadow(
@@ -74,7 +69,7 @@ class BottomBar extends StatelessWidget {
                 child: Icon(
                   Icons.monitor_weight,
                   size: 40, // Larger Scale icon
-                  color: Colors.black, // Scale icon color
+                  color: Colors.white, // Scale icon color
                 ),
               ),
             ),
@@ -99,7 +94,7 @@ class BottomBar extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: Colors.white,
+            color: Colors.black,
             size: 28,
           ),
           SizedBox(height: 5),
@@ -107,7 +102,7 @@ class BottomBar extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 12,
             ),
           ),

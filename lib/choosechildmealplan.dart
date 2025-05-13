@@ -192,7 +192,7 @@ class _ChooseMealPageToUse extends State<ChooseMealPageToUse> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900],
+                colors: [Colors.white, Colors.lightBlue.shade900],
               ),
             ),
             child: SafeArea(

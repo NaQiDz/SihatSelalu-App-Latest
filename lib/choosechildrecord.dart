@@ -193,7 +193,7 @@ class _ChooseRecordPageToUse extends State<ChooseRecordPageToUse> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900],
+                colors: [Colors.white, Colors.lightBlue.shade900],
               ),
             ),
             child: SafeArea(
@@ -210,7 +210,7 @@ class _ChooseRecordPageToUse extends State<ChooseRecordPageToUse> {
                         builder: (context) => IconButton(
                           icon: const Icon(
                             FontAwesomeIcons.arrowLeft,
-                            color: Colors.white,
+                            color: Colors.black,
                             size: 14,
                           ),
                           onPressed: () {
@@ -232,12 +232,12 @@ class _ChooseRecordPageToUse extends State<ChooseRecordPageToUse> {
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: Colors.black),
                           ),
                           SizedBox(height: 20),
                           CircleAvatar(
                             radius: 40,
-                            backgroundImage: AssetImage('sources/logo2.png'),
+                            backgroundImage: AssetImage('sources/logo3.png'),
                           ),
                           SizedBox(height: 0.02),
                           Divider(color: Colors.grey),
@@ -298,7 +298,7 @@ class _ChooseRecordPageToUse extends State<ChooseRecordPageToUse> {
                                       horizontal: 20,
                                       vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey
+                                    color: Colors.white
                                         .withOpacity(0.2),
                                     borderRadius:
                                     BorderRadius.circular(

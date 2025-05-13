@@ -73,17 +73,17 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == 'success') {
+        final dataChild = jsonDecode(response.body);
+        if (dataChild['status'] == 'success') {
           setState(() {
-            childData = data['datachild'];
+            childData = dataChild['datachild'];
             isLoading = false;
           });
           print('Child Data : $childData');
         }
         else {
           setState(() {
-            errorMessage = data['message'] ?? 'An error occurred';
+            errorMessage = dataChild['message'] ?? 'An error occurred';
             isLoading = false;
           });
         }
@@ -171,7 +171,7 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.blue.shade900],
+            colors: [Colors.white, Colors.lightBlue.shade900],
           ),
         ),
         child: Stack(
@@ -238,28 +238,6 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
         child: CircularProgressIndicator(),
       );
     }
-
-    if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              errorMessage!,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                // Add retry logic
-              },
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
     if (childData == null) {
       return const SizedBox(); // Empty state
     }
@@ -278,7 +256,7 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
             int age = calculateAge(child['child_dateofbirth']); // Calculate age
 
             return GestureDetector(
-              onTap: () {
+              onTap: () async{
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -287,6 +265,28 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
                     ),
                   ),
                 );
+                final urlw = Uri.parse('http://172.20.10.4/reset'); // Replace with your ESP8266's IP
+                try {
+                  final response = await http.get(urlw);
+                  if (response.statusCode == 200) {
+                    print("Reset command sent successfully.");
+                  } else {
+                    print("Failed to send reset command.");
+                  }
+                } catch (e) {
+                  print("Error sending reset command: $e");
+                }
+                final urlh = Uri.parse('http://172.20.10.2/reset'); // Replace with your ESP8266's IP
+                try {
+                  final response = await http.get(urlh);
+                  if (response.statusCode == 200) {
+                    print("Reset command sent successfully.");
+                  } else {
+                    print("Failed to send reset command.");
+                  }
+                } catch (e) {
+                  print("Error sending reset command: $e");
+                }
               },
               child: Container(
                 margin: EdgeInsets.symmetric(
@@ -407,7 +407,9 @@ class _ChooseChildrenPageState extends State<ChildrenChoosePage> {
                             style: const TextStyle(color: Colors.black, fontSize: 14),
                           ),
                           Text(
-                            (bmi['child_weight'] != null ? bmi['child_weight'].toString() : 'N/A') + ' kg',
+                            (bmi['child_weight'] != null
+                                ? double.parse(bmi['child_weight'].toString()).toStringAsFixed(2)
+                                : 'N/A') + ' kg',
                             style: const TextStyle(color: Colors.black, fontSize: 14),
                           ),
                         ],

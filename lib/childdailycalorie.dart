@@ -11,33 +11,33 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-class CalorieChildPage extends StatelessWidget {
-  const CalorieChildPage({super.key});
+class CalorieDailyChildPage extends StatelessWidget {
+  const CalorieDailyChildPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ChildrenCaloriePage(),
+      home: ChildrenDailyCaloriePage(),
     );
   }
 }
 
-class ChildrenCaloriePage extends StatefulWidget {
-  const ChildrenCaloriePage({super.key});
+class ChildrenDailyCaloriePage extends StatefulWidget {
+  const ChildrenDailyCaloriePage({super.key});
 
   @override
-  _ChildrenCaloriePageState createState() => _ChildrenCaloriePageState();
+  _ChildrenDailyCaloriePage createState() => _ChildrenDailyCaloriePage();
 }
 
 class BarData {
-  final String month;
-  final double calorie; // Changed to double
+  final String dayMonth; // Changed to store day/month format
+  final double calorie;
 
-  BarData(this.month, this.calorie);
+  BarData(this.dayMonth, this.calorie);
 }
 
-class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
+class _ChildrenDailyCaloriePage extends State<ChildrenDailyCaloriePage> {
   String? username;
   String? id;
   String? email;
@@ -48,6 +48,7 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
   List<String> recorderDates = [];
   int daysPassed = 0;
   List<BarData> chartData = [];
+  String? selectedChildId; // Store the selected child's ID
 
   @override
   void initState() {
@@ -73,9 +74,11 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
   Future<void> fetchUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await dotenv.load(fileName:'.env');
+    await dotenv.load(fileName: '.env');
     String? serverIp;
-    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP'];
 
     setState(() {
       isLoading = true;
@@ -87,7 +90,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/manageuser.php'), // Replace with your URL
         body: {'username': username}, // Send the hardcoded username
       );
 
@@ -100,13 +104,15 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
           });
         } else {
           setState(() {
-            errorMessage = data['error'] ?? data['message'] ?? 'An error occurred';
+            errorMessage =
+                data['error'] ?? data['message'] ?? 'An error occurred';
             isLoading = false;
           });
         }
       } else {
         setState(() {
-          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          errorMessage =
+          'Request failed with status: ${response.statusCode}.';
           isLoading = false;
         });
       }
@@ -118,7 +124,6 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
     }
   }
 
-
   Future<void> fetchChild() async {
     String userid;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -126,7 +131,9 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
     userid = ID.toString();
     await dotenv.load(fileName: '.env');
     String? serverIp;
-    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP'];
 
     if (userid == null) {
       setState(() {
@@ -144,7 +151,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/tryCalorie.php'), // Replace with your URL
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/tryCalorie.php'), // Replace with your URL
         body: {'userid': userid},
       );
 
@@ -166,7 +174,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
         }
       } else {
         setState(() {
-          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          errorMessage =
+          'Request failed with status: ${response.statusCode}.';
           isLoading = false;
         });
       }
@@ -185,10 +194,13 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
     userid = ID.toString();
     await dotenv.load(fileName: '.env');
     String? serverIp;
-    serverIp = dotenv.env['ENVIRONMENT']! == 'dev' ? dotenv.env['DB_HOST_EMU']! : dotenv.env['DB_HOST_IP'];
+    serverIp = dotenv.env['ENVIRONMENT']! == 'dev'
+        ? dotenv.env['DB_HOST_EMU']!
+        : dotenv.env['DB_HOST_IP'];
     try {
       final response = await http.post(
-        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/recorddate.php'), // Replace with your URL
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/recorddate.php'), // Replace with your URL
         body: {'userid': userid},
       );
 
@@ -197,7 +209,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
         if (data['status'] == 'success') {
           setState(() {
-            String recorderDateStr = data['recorder_date']; // Get the recorder_date as string
+            String recorderDateStr =
+            data['recorder_date']; // Get the recorder_date as string
             calculateDaysPassed(recorderDateStr);
             isLoading = false;
           });
@@ -209,7 +222,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
         }
       } else {
         setState(() {
-          errorMessage = 'Failed to load data. Status code: ${response.statusCode}';
+          errorMessage =
+          'Failed to load data. Status code: ${response.statusCode}';
           isLoading = false;
         });
       }
@@ -278,7 +292,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/ai_power/get_calories.php'),
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/ai_power/get_calories.php'),
         body: {'userid': userid},
       );
 
@@ -294,7 +309,6 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
             isLoading = false;
           });
           print('Child Data: $childData');
-
         } else {
           // Handle the specific error message from the response
           setState(() {
@@ -306,7 +320,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
       } else {
         // Handle HTTP errors
         setState(() {
-          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          errorMessage =
+          'Request failed with status: ${response.statusCode}.';
           isLoading = false;
         });
         print('HTTP Error: ${response.statusCode}');
@@ -335,7 +350,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://$serverIp/SihatSelaluAppDatabase/ai_power/get_child_calories.php'),
+        Uri.parse(
+            'http://$serverIp/SihatSelaluAppDatabase/get_child_calories_perday.php'), // Updated the file name
         body: {'child_id': childId},
       );
 
@@ -343,36 +359,27 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
       print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // Try to decode the response body
-        Map<String, dynamic> data;
-        try {
-          data = jsonDecode(response.body);
-        } catch (e) {
-          setState(() {
-            errorMessage = "Error decoding response: $e";
-            isLoading = false;
-          });
-          print('Error decoding JSON: $e');
-          return;
-        }
+        final data = jsonDecode(response.body);
 
         if (data['status'] == 'success') {
           List<dynamic> calorieRecords = data['data'];
           List<BarData> tempChartData = [];
 
           for (var record in calorieRecords) {
-            // Check if the date format is correct before parsing
+            // Convert the total_calorie to double and handle any parsing errors
+            double calorieValue;
             try {
-              String formattedDate = DateFormat('MMM')
-                  .format(DateTime.parse(record['recorder_calorie_at']));
-              tempChartData.add(BarData(
-                formattedDate,
-                double.parse(record['suggestion_calorie'].toString()),
-              ));
+              calorieValue = double.parse(record['total_calorie'].toString());
             } catch (e) {
-              print('Error parsing date or calorie value: $e');
-              // Handle the error, e.g., skip this record or show an error message
+              print('Error parsing calorie value: $e');
+              calorieValue = 0.0; // Default value in case of error
             }
+
+            // Format the date to show day/month
+            String formattedDate = DateFormat('dd/MM')
+                .format(DateTime.parse(record['date']));
+
+            tempChartData.add(BarData(formattedDate, calorieValue));
           }
 
           setState(() {
@@ -390,7 +397,8 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
         }
       } else {
         setState(() {
-          errorMessage = 'Request failed with status: ${response.statusCode}.';
+          errorMessage =
+          'Request failed with status: ${response.statusCode}.';
           isLoading = false;
         });
         print('HTTP Error: ${response.statusCode}');
@@ -403,6 +411,9 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
       });
     }
   }
+
+
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -436,13 +447,14 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                         builder: (context) => IconButton(
                           icon: Icon(
                             FontAwesomeIcons.arrowLeft,
-                            color: Colors.black,
+                            color: Colors.white,
                             size: 14,
                           ),
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => HomePage()),
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()),
                             );
                           },
                         ),
@@ -454,9 +466,9 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'History Calorie',
+                            'Tracking Calorie \n      Per Days',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.white,
                               fontSize: screenHeight * 0.03,
                               fontWeight: FontWeight.bold,
                             ),
@@ -464,7 +476,7 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                           Text(
                             'Recently Refresh : $daysPassed Days Later',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.white,
                               fontSize: screenHeight * 0.015,
                               fontWeight: FontWeight.w200,
                             ),
@@ -476,7 +488,7 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                               builder: (context) => IconButton(
                                 icon: Icon(
                                   FontAwesomeIcons.refresh,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   size: 30,
                                 ),
                                 onPressed: () async {
@@ -494,11 +506,16 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                                           children: [
                                             Opacity(
                                               opacity: 0.3,
-                                              child: ModalBarrier(dismissible: false, color: Colors.black),
+                                              child: ModalBarrier(
+                                                  dismissible: false,
+                                                  color: Colors.black),
                                             ),
                                             Center(
-                                              child: CircularProgressIndicator(
-                                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              child:
+                                              CircularProgressIndicator(
+                                                valueColor:
+                                                AlwaysStoppedAnimation<
+                                                    Color>(Colors.white),
                                               ),
                                             ),
                                           ],
@@ -515,7 +532,6 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
 
                                     await fetchChildCalorie();
                                     await fetchChild();
-
                                   } catch (e) {
                                     print("Error occurred: $e");
 
@@ -532,36 +548,50 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.00),
-                    Divider(color: Colors.black),
+                    Divider(color: Colors.grey),
                     SizedBox(height: screenHeight * 0.01),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: SizedBox(
-                        height: 200,
-                        child: SfCartesianChart(
-                          primaryXAxis: CategoryAxis(
-                            labelStyle: TextStyle(color: Colors.black),
-                          ),
-                          primaryYAxis: NumericAxis(
-                            labelStyle: TextStyle(color: Colors.black),
-                          ),
-                          series: <CartesianSeries>[
-                            ColumnSeries<BarData, String>(
-                              dataSource: chartData,
-                              xValueMapper: (BarData barData, _) => barData.month,
-                              yValueMapper: (BarData barData, _) => barData.calorie,
-                              color: Colors.blue,
-                              dataLabelSettings: DataLabelSettings(
-                                isVisible: true,
-                                textStyle: TextStyle(color: Colors.black),
-                              ),
+                    // Change the condition to check if selectedChildId is not null
+                    if (selectedChildId != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: SizedBox(
+                          height: 200,
+                          child: SfCartesianChart(
+                            primaryXAxis: CategoryAxis(
+                              labelStyle: TextStyle(color: Colors.white),
                             ),
-                          ],
+                            primaryYAxis: NumericAxis(
+                              labelStyle: TextStyle(color: Colors.white),
+                            ),
+                            series: <CartesianSeries>[
+                              ColumnSeries<BarData, String>(
+                                dataSource: chartData,
+                                xValueMapper: (BarData barData, _) =>
+                                barData.dayMonth, // Use dayMonth field
+                                yValueMapper: (BarData barData, _) =>
+                                barData.calorie,
+                                color: Colors.blue,
+                                dataLabelSettings: DataLabelSettings(
+                                  isVisible: true,
+                                  textStyle: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    Center(
+                      child: Text(
+                        'Age',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.014,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
-
-                    Divider(color: Colors.black),
+                    SizedBox(height: screenHeight * 0.01),
+                    Divider(color: Colors.grey),
                     SizedBox(height: screenHeight * 0.01),
                     Center(
                       child: Text(
@@ -591,47 +621,67 @@ class _ChildrenCaloriePageState extends State<ChildrenCaloriePage> {
                             itemCount: childData!.length,
                             itemBuilder: (context, index) {
                               var child = childData![index];
-                              int age = calculateAge(child['child_dateofbirth']);
+                              int age = calculateAge(
+                                  child['child_dateofbirth']);
 
                               return GestureDetector(
                                 onTap: () {
-                                  fetchCalorieData(child['child_id'].toString());
+                                  setState(() {
+                                    selectedChildId = child['child_id'].toString();
+                                  });
+                                  fetchCalorieData(selectedChildId!);
                                 },
                                 child: Container(
-                                  margin: EdgeInsets.symmetric(vertical: 4),
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  margin: EdgeInsets.symmetric(
+                                      vertical: 4),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8),
                                   height: 50.0,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(24),
+                                    color: Colors.grey
+                                        .withOpacity(0.2),
+                                    borderRadius:
+                                    BorderRadius.circular(24),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment
+                                        .spaceBetween,
                                     children: [
                                       Row(
                                         children: [
                                           SizedBox(width: 5),
                                           Text(
-                                            child['child_fullname'] ?? 'No Name',
-                                            style: TextStyle(color: Colors.white),
+                                            child['child_fullname'] ??
+                                                'No Name',
+                                            style: TextStyle(
+                                                color:
+                                                Colors.white),
                                           ),
                                         ],
                                       ),
                                       Row(
-                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisSize:
+                                        MainAxisSize.min,
                                         children: [
                                           Text(
                                             'Age: $age years',
-                                            style: TextStyle(color: Colors.white),
+                                            style: TextStyle(
+                                                color:
+                                                Colors.white),
                                           ),
                                         ],
                                       ),
                                       Row(
-                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisSize:
+                                        MainAxisSize.min,
                                         children: [
                                           Text(
                                             'Gender: ' + (child['child_gender'] ?? 'No Name'),
-                                            style: TextStyle(color: Colors.white),
+                                            style: TextStyle(
+                                                color:
+                                                Colors.white),
                                           ),
                                         ],
                                       ),

@@ -93,7 +93,7 @@ class _SideBarState extends State<SideBar> {
       child: Container(
         padding: EdgeInsets.all(screenHeight * 0.01),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.blue.shade900.withOpacity(0.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -104,18 +104,18 @@ class _SideBarState extends State<SideBar> {
               child: Column(
                 children: [
                   SizedBox(height: screenHeight * 0.05),
-                  if (userData?['Icon'] == null)
+                  if (userData?['Icon'] == null || userData?['Icon'] == 'null') // Check for both null and the string 'null'
                     CircleAvatar(
                       radius: screenHeight * 0.04,
                       backgroundImage: NetworkImage(
                         'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
                       ),
                     ),
-                  if (userData?['Icon'] != null)
+                  if (userData?['Icon'] != null && userData?['Icon'] != 'null') // Check for both null and the string 'null'
                     CircleAvatar(
                       radius: screenHeight * 0.04,
                       backgroundImage: NetworkImage(
-                        'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon']}',
+                        'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon'] ?? ''}', // Use ?? '' to handle null
                       ),
                     ),
                   SizedBox(height: screenHeight * 0.02),

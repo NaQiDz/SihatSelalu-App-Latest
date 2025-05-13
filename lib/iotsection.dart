@@ -5,6 +5,7 @@ import 'package:SihatSelaluApp/choosechild.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
@@ -40,31 +41,34 @@ class _IOTPageToUse extends State<IOTPage> {
   }
 
   Future<void> fetchWeight() async {
-    final url = Uri.parse('http://172.20.10.4/weight');
+    final url = Uri.parse('http://172.20.10.2/weight');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         double weight = double.tryParse(data['weight'].toString()) ?? 0.0;
         setState(() {
-          _weight = "${(weight * 2).toStringAsFixed(3)} ${data['unit']}";
-          weightAsDouble = weight;
+          _weight = "${(weight * 1.8).toStringAsFixed(2)} ${data['unit']}";
+          weightAsDouble = weight * 1.8;
         });
 
-        if (weight > 10 && !_startBmiCountdown) {
+        if (weightAsDouble > 10 && heightInMeters > 0.6 && !_startBmiCountdown) {
           _startBmiCountdown = true;
           _startCountdownToBmiDialog();
         }
+      } else {
       }
     } catch (e) {
       setState(() {
         _weight = "Loading...";
       });
+      print('Error fetching weight: $e'); // Log the error for debugging
     }
   }
 
+
   Future<void> fetchHeight() async {
-    final url = Uri.parse('http://172.20.10.2/height'); // Replace with your ESP8266 IP
+    final url = Uri.parse('http://172.20.10.4/height'); // Replace with your ESP8266 IP
     try {
       final response = await http.get(url); // Send GET request using http package
       if (response.statusCode == 200) {
@@ -85,8 +89,6 @@ class _IOTPageToUse extends State<IOTPage> {
       });
     }
   }
-
-
 
   Future<void> fetchUserData() async {
     final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
@@ -150,6 +152,8 @@ class _IOTPageToUse extends State<IOTPage> {
   }
 
   Future<void> insertBmi(double height, double weight, double bmi) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? ID = prefs.getString('ID');
     final String serverIp = dotenv.env['ENVIRONMENT'] == 'dev'
         ? dotenv.env['DB_HOST_EMU']!
         : dotenv.env['DB_HOST_IP']!;
@@ -171,6 +175,7 @@ class _IOTPageToUse extends State<IOTPage> {
           'child_weight': weight.toString(),
           'child_bmi': bmi.toString(),
           'recordDate': DateTime.now().toString(), // Set current time
+            'parentid': ID.toString(), // Set current time
         }),
       );
       int id = widget.childId;
@@ -461,7 +466,7 @@ class _IOTPageToUse extends State<IOTPage> {
         axes: <RadialAxis>[
           RadialAxis(
             minimum: 0,
-            maximum: 75,
+            maximum: 100,
             pointers: <GaugePointer>[
               NeedlePointer(value: (weightAsDouble * 2), enableAnimation: true),
             ],

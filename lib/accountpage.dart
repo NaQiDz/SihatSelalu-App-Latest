@@ -1,5 +1,6 @@
 import 'package:SihatSelaluApp/about_system.dart';
 import 'package:SihatSelaluApp/bottombar.dart';
+import 'package:SihatSelaluApp/caloriechild.dart';
 import 'package:SihatSelaluApp/child_history.dart';
 import 'package:SihatSelaluApp/childpage.dart';
 import 'package:SihatSelaluApp/choosechildrecord.dart';
@@ -136,7 +137,7 @@ class _AccountPageState extends State<AccountPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900],
+                colors: [Colors.white, Colors.lightBlue.shade900],
               ),
             ),
             child: SafeArea(
@@ -153,7 +154,7 @@ class _AccountPageState extends State<AccountPage> {
                         builder: (context) => IconButton(
                           icon: Icon(
                             FontAwesomeIcons.arrowLeft,
-                            color: Colors.white,
+                            color: Colors.black,
                             size: 14,
                           ),
                           onPressed: () {
@@ -172,30 +173,31 @@ class _AccountPageState extends State<AccountPage> {
                           Text(
                             'Account',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: screenHeight * 0.03,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-                          if (userData?['Icon'] == null)
+                          if (userData?['Icon'] == null || userData?['Icon'] == 'null') // Check for both null and the string 'null'
                             CircleAvatar(
-                              radius: screenHeight * 0.06,
+                              radius: screenHeight * 0.04,
                               backgroundImage: NetworkImage(
-                                  'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Default image
+                                'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
+                              ),
                             ),
-                          if (userData?['Icon'] != null)
+                          if (userData?['Icon'] != null && userData?['Icon'] != 'null') // Check for both null and the string 'null'
                             CircleAvatar(
-                              radius: screenHeight * 0.06,
+                              radius: screenHeight * 0.04,
                               backgroundImage: NetworkImage(
-                                  'http://$serverIp/SihatSelaluAppDatabase/' +
-                                      userData?['Icon']), // User image
+                                'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon'] ?? ''}', // Use ?? '' to handle null
+                              ),
                             ),
                           SizedBox(height: screenHeight * 0.01),
                           Text(
                             (username?.toUpperCase() ?? 'Unknown User'),
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -242,7 +244,7 @@ class _AccountPageState extends State<AccountPage> {
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -250,20 +252,20 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             Row(
               children: [
-                Icon(FontAwesomeIcons.userCircle, color: Colors.white),
+                Icon(FontAwesomeIcons.userCircle, color: Colors.black),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your Account', style: TextStyle(color: Colors.white)),
-                    Text(email!, style: TextStyle(color: Colors.white, fontSize: 12)),
+                    Text('Your Account', style: TextStyle(color: Colors.black)),
+                    Text(email!, style: TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ],
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ],
         ),
@@ -285,7 +287,7 @@ class _AccountPageState extends State<AccountPage> {
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -293,20 +295,20 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             Row(
               children: [
-                Icon(FontAwesomeIcons.child, color: Colors.white),
+                Icon(FontAwesomeIcons.child, color: Colors.black),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your Child', style: TextStyle(color: Colors.white)),
-                    Text('Information about your children', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    Text('Your Child', style: TextStyle(color: Colors.black)),
+                    Text('Information about your children', style: TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ],
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ],
         ),
@@ -327,7 +329,7 @@ class _AccountPageState extends State<AccountPage> {
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -335,20 +337,20 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             Row(
               children: [
-                Icon(FontAwesomeIcons.heartbeat, color: Colors.white),
+                Icon(FontAwesomeIcons.heartbeat, color: Colors.black),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Record Health', style: TextStyle(color: Colors.white)),
-                    Text('Record of your children', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    Text('Record Health', style: TextStyle(color: Colors.black)),
+                    Text('Record of your children', style: TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ],
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ],
         ),
@@ -362,14 +364,14 @@ class _AccountPageState extends State<AccountPage> {
         // Navigate to ProfilePage when the entire box is tapped
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProfilePage()), // Replace with your actual ProfilePage
+          MaterialPageRoute(builder: (context) => ChildrenCaloriePage()), // Replace with your actual ProfilePage
         );
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -377,20 +379,20 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             Row(
               children: [
-                Icon(FontAwesomeIcons.history, color: Colors.white),
+                Icon(FontAwesomeIcons.history, color: Colors.black),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('History Usage', style: TextStyle(color: Colors.white)),
-                    Text('Your child history of weight and height', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    Text('History Usage', style: TextStyle(color: Colors.black)),
+                    Text('Your child history of weight and height', style: TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ],
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ],
         ),
@@ -411,7 +413,7 @@ class _AccountPageState extends State<AccountPage> {
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -419,20 +421,20 @@ class _AccountPageState extends State<AccountPage> {
           children: [
             Row(
               children: [
-                Icon(FontAwesomeIcons.infoCircle, color: Colors.white),
+                Icon(FontAwesomeIcons.infoCircle, color: Colors.black),
                 SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('About System', style: TextStyle(color: Colors.white)),
-                    Text('All about our system and team members', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    Text('About System', style: TextStyle(color: Colors.black)),
+                    Text('All about our system and team members', style: TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ],
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ],
         ),

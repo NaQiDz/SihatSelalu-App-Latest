@@ -1,3 +1,4 @@
+import 'package:SihatSelaluApp/choosechildmealplan.dart';
 import 'package:SihatSelaluApp/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,7 +13,6 @@ import 'package:SihatSelaluApp/sidebar.dart';
 class MealPlan extends StatefulWidget {
   final int childId;
   const MealPlan({super.key, required this.childId});
-
 
   @override
   _MealPlanState createState() => _MealPlanState();
@@ -212,6 +212,14 @@ class _MealPlanState extends State<MealPlan> {
     return formatter.format(now);
   }
 
+  bool isToday(int index) {
+    DateTime today = DateTime.now();
+    DateTime selectedDate = DateFormat('dd/MM/yyyy').parse(weekData[index]['date']);
+    return selectedDate.year == today.year &&
+        selectedDate.month == today.month &&
+        selectedDate.day == today.day;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -231,7 +239,7 @@ class _MealPlanState extends State<MealPlan> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.black, Colors.blue.shade900],
+                  colors: [Colors.white, Colors.lightBlue.shade900],
                 ),
               ),
               child: SafeArea(
@@ -254,7 +262,7 @@ class _MealPlanState extends State<MealPlan> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => HomePage()),
+                                MaterialPageRoute(builder: (context) => ChooseMealPage()),
                               );
                             },
                           ),
@@ -331,39 +339,43 @@ class _MealPlanState extends State<MealPlan> {
                         mealType: "BREAKFAST",
                         meals: mealsByDay[selectedDayIndex]?['breakfast'] ?? [],
                         size: size,
-                        onTap: (meals) => _showFoodSelectionDialog(meals, "BREAKFAST"),
+                        onTap: isToday(selectedDayIndex) ? (meals) => _showFoodSelectionDialog(meals, "BREAKFAST") : null,
                         selectedMeals: selectedMealsByType["BREAKFAST"]!,
                       ),
+
                       // Meal Item - Lunch
                       MealItem(
                         mealType: "LUNCH",
                         meals: mealsByDay[selectedDayIndex]?['lunch'] ?? [],
                         size: size,
-                        onTap: (meals) => _showFoodSelectionDialog(meals, "LUNCH"),
+                        onTap: isToday(selectedDayIndex) ? (meals) => _showFoodSelectionDialog(meals, "LUNCH") : null,
                         selectedMeals: selectedMealsByType["LUNCH"]!,
                       ),
+
                       // Meal Item - Dinner
                       MealItem(
                         mealType: "DINNER",
                         meals: mealsByDay[selectedDayIndex]?['dinner'] ?? [],
                         size: size,
-                        onTap: (meals) => _showFoodSelectionDialog(meals, "DINNER"),
+                        onTap: isToday(selectedDayIndex) ? (meals) => _showFoodSelectionDialog(meals, "DINNER") : null,
                         selectedMeals: selectedMealsByType["DINNER"]!,
                       ),
                       // Save Meal Button
                       SizedBox(height: 20),
                       Center(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: isToday(selectedDayIndex)
+                              ? () {
                             final selectedMeals = [
                               ...selectedMealsByType["BREAKFAST"]!,
                               ...selectedMealsByType["LUNCH"]!,
                               ...selectedMealsByType["DINNER"]!,
                             ];
                             saveSelectedMeals(weekData[selectedDayIndex]['date'], selectedMeals);
-                          },
+                          }
+                              : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlueAccent,
+                            backgroundColor: isToday(selectedDayIndex) ? Colors.lightBlueAccent : Colors.grey,
                             padding: EdgeInsets.symmetric(horizontal: size.width * 0.2, vertical: size.width * 0.05),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -449,7 +461,7 @@ class MealItem extends StatelessWidget {
   final String mealType;
   final List<Map<String, dynamic>> meals;
   final Size size;
-  final Function(List<Map<String, dynamic>>) onTap;
+  final Function(List<Map<String, dynamic>>)? onTap;
   final List<Map<String, dynamic>> selectedMeals;
 
   const MealItem({
@@ -523,11 +535,13 @@ class MealItem extends StatelessWidget {
             ),
           if (meals.isNotEmpty)
             TextButton(
-              onPressed: () => onTap(meals),
+              onPressed: onTap != null ? () => onTap!(meals) : null,
+              style: TextButton.styleFrom(
+                foregroundColor: onTap != null ? Colors.blueAccent : Colors.grey,
+              ),
               child: Text(
                 "SELECT $mealType",
                 style: TextStyle(
-                  color: Colors.blueAccent,
                   fontSize: size.width * 0.04,
                 ),
               ),

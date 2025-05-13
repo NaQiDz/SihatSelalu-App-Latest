@@ -186,7 +186,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.blue.shade900],
+                colors: [Colors.white, Colors.lightBlue.shade900],
               ),
             ),
             child: SafeArea(
@@ -203,7 +203,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                         builder: (context) => IconButton(
                           icon: Icon(
                             FontAwesomeIcons.arrowLeft,
-                            color: Colors.white,
+                            color: Colors.black,
                             size: 14,
                           ),
                           onPressed: () {
@@ -220,7 +220,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                       child: Text(
                         'Manage Children',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: screenHeight * 0.03,
                           fontWeight: FontWeight.bold,
                         ),
@@ -229,17 +229,19 @@ class _ChildrenPageState extends State<ChildrenPage> {
                     SizedBox(height: screenHeight * 0.04),
                     Row(
                       children: [
-                        if (userData?['Icon'] == null)
+                        if (userData?['Icon'] == null || userData?['Icon'] == 'null') // Check for both null and the string 'null'
                           CircleAvatar(
-                            radius: screenHeight * 0.06,
+                            radius: screenHeight * 0.04,
                             backgroundImage: NetworkImage(
-                                'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png'), // Use user image or default
+                              'http://$serverIp/SihatSelaluAppDatabase/images/defaultprofile.png',
+                            ),
                           ),
-                        if (userData?['Icon'] != null)
+                        if (userData?['Icon'] != null && userData?['Icon'] != 'null') // Check for both null and the string 'null'
                           CircleAvatar(
-                            radius: screenHeight * 0.06,
+                            radius: screenHeight * 0.04,
                             backgroundImage: NetworkImage(
-                                'http://$serverIp/SihatSelaluAppDatabase/' + userData?['Icon']), // Use user image or default
+                              'http://$serverIp/SihatSelaluAppDatabase/${userData?['Icon'] ?? ''}', // Use ?? '' to handle null
+                            ),
                           ),
                         SizedBox(width: screenWidth * 0.04),
                         Column(
@@ -248,21 +250,21 @@ class _ChildrenPageState extends State<ChildrenPage> {
                             Text(
                               (userData?['Username']?.toString() ?? 'loading..'),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               'Age       : ${userData?['Age']?.toString() ?? 'loading..'} Years',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.black),
                             ),
                             Text(
                               'Gender : ${userData?['Gender']?.toString() ?? 'loading..'}',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.black),
                             ),
                             Text(
                               'Role      : Parent',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ],
                         ),
@@ -292,7 +294,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                         Text(
                           'Add Child',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -333,7 +335,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                               margin: EdgeInsets.symmetric(vertical: 3),
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 1),
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(24),
                               ),
                               child: Row(
@@ -344,7 +346,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                                       SizedBox(width: 5),
                                       Text(
                                         child['child_fullname'] ?? 'No Name',
-                                        style: TextStyle(color: Colors.white),
+                                        style: TextStyle(color: Colors.black),
                                       ),
                                     ],
                                   ),
@@ -353,7 +355,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
                                     children: [
                                       Text(
                                         'Age: $age',
-                                        style: TextStyle(color: Colors.white),
+                                        style: TextStyle(color: Colors.black),
                                       ),
                                       SizedBox(width: 2),
                                       ElevatedButton(
